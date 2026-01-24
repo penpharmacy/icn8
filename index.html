@@ -284,10 +284,9 @@
         let dVal = dRadio.value === "อื่นๆ" ? (document.getElementById('deptOther').value || "อื่นๆ") : dRadio.value;
         let rVal = rRadio.value === "อื่นๆ" ? (document.getElementById('roleOther').value || "อื่นๆ") : rRadio.value;
         
-        // กรองข้อมูลเฉพาะ moment ที่มีการเลือก (นำ alert ออกตามสั่ง)
         const moments = [0,1,2,3,4].map(i => {
             const el = document.querySelector(`input[name="m${i}"]:checked`);
-            return el ? el.value : "Pending"; // หรือจัดการตาม Logic ของแอป
+            return el ? el.value : "Pending";
         });
 
         const record = { obsDate: dDate, obsTime: dTime, dept: dVal, role: rVal, m: moments, equips: Array.from(document.querySelectorAll('.equip')).map(e => e.checked ? 1 : 0) };
@@ -303,32 +302,35 @@
     };
 
     function render(data) {
-        // กรองเฉพาะ Record ที่มีข้อมูลครบถ้วนสำหรับ Moment (ข้าม Pending)
-        const validData = data.filter(d => !d.m.includes("Pending"));
-        let n = validData.length; if(n === 0) return;
+        let n_records = data.length; if(n_records === 0) return;
 
         let hw = 0, hr = 0, none = 0, glove = 0, eq = 0;
+        let totalOpp = 0;
         let mComp = [0,0,0,0,0];
+        let mTotal = [0,0,0,0,0];
 
-        validData.forEach(d => {
+        data.forEach(d => {
             d.m.forEach((v, idx) => { 
-                if(v==='HW') { hw++; mComp[idx]++; }
-                else if(v==='HR') { hr++; mComp[idx]++; }
-                else if(v==='None') none++;
-                else if(v==='Glove') glove++;
+                if (v !== "Pending") {
+                    totalOpp++;
+                    mTotal[idx]++;
+                    if(v==='HW') { hw++; mComp[idx]++; }
+                    else if(v==='HR') { hr++; mComp[idx]++; }
+                    else if(v==='None') none++;
+                    else if(v==='Glove') glove++;
+                }
             });
             d.equips.forEach(v => eq += v);
         });
 
-        const totalMoments = n * 5;
         const totalHWHR = hw + hr;
 
         document.getElementById('hw_total').innerText = (totalHWHR > 0 ? ((hw / totalHWHR) * 100).toFixed(1) : "0.0") + `% (${hw}/${totalHWHR})`;
         document.getElementById('hr_total').innerText = (totalHWHR > 0 ? ((hr / totalHWHR) * 100).toFixed(1) : "0.0") + `% (${hr}/${totalHWHR})`;
-        document.getElementById('comp_rate').innerText = ((totalHWHR / totalMoments) * 100).toFixed(1) + `% (${totalHWHR}/${totalMoments})`;
-        document.getElementById('equip_rate').innerText = ((eq / (n * 7)) * 100).toFixed(1) + `% (${eq}/${n * 7})`;
+        document.getElementById('comp_rate').innerText = (totalOpp > 0 ? ((totalHWHR / totalOpp) * 100).toFixed(1) : "0.0") + `% (${totalHWHR}/${totalOpp})`;
+        document.getElementById('equip_rate').innerText = ((eq / (n_records * 7)) * 100).toFixed(1) + `% (${eq}/${n_records * 7})`;
 
-        momentChart.data.datasets[0].data = mComp.map(c => ((c / n) * 100).toFixed(1));
+        momentChart.data.datasets[0].data = mComp.map((c, i) => mTotal[i] > 0 ? ((c / mTotal[i]) * 100).toFixed(1) : 0);
         momentChart.update();
         cleanPieChart.data.datasets[0].data = [hw, hr, none, glove];
         cleanPieChart.update();
@@ -336,20 +338,21 @@
         const mBody = document.getElementById('momentTableBody'); mBody.innerHTML = '';
         momentLabels.forEach((l, idx) => {
             let s = {HW:0, HR:0, None:0, Glove:0};
-            validData.forEach(d => s[d.m[idx]]++);
+            data.forEach(d => { if(d.m[idx] !== "Pending") s[d.m[idx]]++; });
+            let totalM = s.HW + s.HR + s.None + s.Glove;
             mBody.innerHTML += `<tr>
                 <td class="text-start fw-bold">${l}</td>
-                <td class="table-success fw-bold">${formatVal(s.HW + s.HR, n)}</td>
-                <td>${formatVal(s.HW, n)}</td>
-                <td>${formatVal(s.HR, n)}</td>
-                <td>${formatVal(s.None, n)}</td>
-                <td>${formatVal(s.Glove, n)}</td>
+                <td class="table-success fw-bold">${formatVal(s.HW + s.HR, totalM)}</td>
+                <td>${formatVal(s.HW, totalM)}</td>
+                <td>${formatVal(s.HR, totalM)}</td>
+                <td>${formatVal(s.None, totalM)}</td>
+                <td>${formatVal(s.Glove, totalM)}</td>
             </tr>`;
         });
 
-        renderTable(validData, 'dept', 'deptTableBody');
-        renderTable(validData, 'role', 'roleTableBody');
-        renderEquipTable(validData);
+        renderTable(data, 'dept', 'deptTableBody');
+        renderTable(data, 'role', 'roleTableBody');
+        renderEquipTable(data);
     }
 
     function renderTable(data, field, bodyId) {
@@ -359,9 +362,9 @@
             let f = data.filter(d => d[field] === k);
             let s = {HW:0, HR:0, None:0, Glove:0};
             f.forEach(d => d.m.forEach(v => {
-                if(s[v] !== undefined) s[v]++;
+                if(v !== "Pending" && s[v] !== undefined) s[v]++;
             }));
-            let total = f.length * 5; // ตัวส่วนเป็นกิจกรรมทั้งหมดในกลุ่มนั้น (HW+HR+ไม่ล้าง+ถุงมือ)
+            let total = s.HW + s.HR + s.None + s.Glove;
             body.innerHTML += `<tr>
                 <td>${k}</td>
                 <td class="table-success fw-bold">${formatVal(s.HW+s.HR, total)}</td>
