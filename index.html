@@ -160,19 +160,41 @@
             <div class="col-md-6">
                 <div class="card p-4">
                     <h5 class="section-title">แยกตามแผนก</h5>
-                    <table class="table table-sm table-bordered text-center align-middle">
-                        <thead><tr><th>แผนก</th><th>HW+HR(%)</th><th>ไม่ล้าง(%)</th><th>ถุงมือ(%)</th></tr></thead>
-                        <tbody id="deptTableBody"></tbody>
-                    </table>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered text-center align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>แผนก</th>
+                                    <th class="table-success">HW+HR</th>
+                                    <th>HW</th>
+                                    <th>HR</th>
+                                    <th>ไม่ล้าง</th>
+                                    <th>ถุงมือ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="deptTableBody"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="card p-4">
                     <h5 class="section-title">แยกตามวิชาชีพ</h5>
-                    <table class="table table-sm table-bordered text-center align-middle">
-                        <thead><tr><th>วิชาชีพ</th><th>HW+HR(%)</th><th>ไม่ล้าง(%)</th><th>ถุงมือ(%)</th></tr></thead>
-                        <tbody id="roleTableBody"></tbody>
-                    </table>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered text-center align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>วิชาชีพ</th>
+                                    <th class="table-success">HW+HR</th>
+                                    <th>HW</th>
+                                    <th>HR</th>
+                                    <th>ไม่ล้าง</th>
+                                    <th>ถุงมือ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="roleTableBody"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
@@ -258,11 +280,17 @@
         const dRadio = document.querySelector('input[name="deptRadio"]:checked');
         const rRadio = document.querySelector('input[name="roleRadio"]:checked');
         if (!dDate || !dTime || !dRadio || !rRadio) return alert("กรุณากรอกข้อมูลให้ครบ");
-        for (let i = 0; i < 5; i++) { if (!document.querySelector(`input[name="m${i}"]:checked`)) return alert(`กรุณาประเมิน Moment ที่ ${i+1}`); }
         
         let dVal = dRadio.value === "อื่นๆ" ? (document.getElementById('deptOther').value || "อื่นๆ") : dRadio.value;
         let rVal = rRadio.value === "อื่นๆ" ? (document.getElementById('roleOther').value || "อื่นๆ") : rRadio.value;
-        const record = { obsDate: dDate, obsTime: dTime, dept: dVal, role: rVal, m: [0,1,2,3,4].map(i => document.querySelector(`input[name="m${i}"]:checked`).value), equips: Array.from(document.querySelectorAll('.equip')).map(e => e.checked ? 1 : 0) };
+        
+        // กรองข้อมูลเฉพาะ moment ที่มีการเลือก (นำ alert ออกตามสั่ง)
+        const moments = [0,1,2,3,4].map(i => {
+            const el = document.querySelector(`input[name="m${i}"]:checked`);
+            return el ? el.value : "Pending"; // หรือจัดการตาม Logic ของแอป
+        });
+
+        const record = { obsDate: dDate, obsTime: dTime, dept: dVal, role: rVal, m: moments, equips: Array.from(document.querySelectorAll('.equip')).map(e => e.checked ? 1 : 0) };
         fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(record) });
         database.push(record); render(database); alert("บันทึกข้อมูลเรียบร้อยแล้ว"); clearForm();
     }
@@ -275,11 +303,14 @@
     };
 
     function render(data) {
-        let n = data.length; if(n === 0) return;
+        // กรองเฉพาะ Record ที่มีข้อมูลครบถ้วนสำหรับ Moment (ข้าม Pending)
+        const validData = data.filter(d => !d.m.includes("Pending"));
+        let n = validData.length; if(n === 0) return;
+
         let hw = 0, hr = 0, none = 0, glove = 0, eq = 0;
         let mComp = [0,0,0,0,0];
 
-        data.forEach(d => {
+        validData.forEach(d => {
             d.m.forEach((v, idx) => { 
                 if(v==='HW') { hw++; mComp[idx]++; }
                 else if(v==='HR') { hr++; mComp[idx]++; }
@@ -292,24 +323,20 @@
         const totalMoments = n * 5;
         const totalHWHR = hw + hr;
 
-        // Dashboard Updates with Fractions
         document.getElementById('hw_total').innerText = (totalHWHR > 0 ? ((hw / totalHWHR) * 100).toFixed(1) : "0.0") + `% (${hw}/${totalHWHR})`;
         document.getElementById('hr_total').innerText = (totalHWHR > 0 ? ((hr / totalHWHR) * 100).toFixed(1) : "0.0") + `% (${hr}/${totalHWHR})`;
         document.getElementById('comp_rate').innerText = ((totalHWHR / totalMoments) * 100).toFixed(1) + `% (${totalHWHR}/${totalMoments})`;
         document.getElementById('equip_rate').innerText = ((eq / (n * 7)) * 100).toFixed(1) + `% (${eq}/${n * 7})`;
 
-        // Update Charts
         momentChart.data.datasets[0].data = mComp.map(c => ((c / n) * 100).toFixed(1));
         momentChart.update();
-        
         cleanPieChart.data.datasets[0].data = [hw, hr, none, glove];
         cleanPieChart.update();
 
-        // 5 Moments Table
         const mBody = document.getElementById('momentTableBody'); mBody.innerHTML = '';
         momentLabels.forEach((l, idx) => {
             let s = {HW:0, HR:0, None:0, Glove:0};
-            data.forEach(d => s[d.m[idx]]++);
+            validData.forEach(d => s[d.m[idx]]++);
             mBody.innerHTML += `<tr>
                 <td class="text-start fw-bold">${l}</td>
                 <td class="table-success fw-bold">${formatVal(s.HW + s.HR, n)}</td>
@@ -320,9 +347,9 @@
             </tr>`;
         });
 
-        renderTable(data, 'dept', 'deptTableBody');
-        renderTable(data, 'role', 'roleTableBody');
-        renderEquipTable(data);
+        renderTable(validData, 'dept', 'deptTableBody');
+        renderTable(validData, 'role', 'roleTableBody');
+        renderEquipTable(validData);
     }
 
     function renderTable(data, field, bodyId) {
@@ -331,9 +358,18 @@
         keys.forEach(k => {
             let f = data.filter(d => d[field] === k);
             let s = {HW:0, HR:0, None:0, Glove:0};
-            f.forEach(d => d.m.forEach(v => s[v]++));
-            let total = f.length * 5;
-            body.innerHTML += `<tr><td>${k}</td><td class="fw-bold">${formatVal(s.HW+s.HR, total)}</td><td>${formatVal(s.None, total)}</td><td>${formatVal(s.Glove, total)}</td></tr>`;
+            f.forEach(d => d.m.forEach(v => {
+                if(s[v] !== undefined) s[v]++;
+            }));
+            let total = f.length * 5; // ตัวส่วนเป็นกิจกรรมทั้งหมดในกลุ่มนั้น (HW+HR+ไม่ล้าง+ถุงมือ)
+            body.innerHTML += `<tr>
+                <td>${k}</td>
+                <td class="table-success fw-bold">${formatVal(s.HW+s.HR, total)}</td>
+                <td>${formatVal(s.HW, total)}</td>
+                <td>${formatVal(s.HR, total)}</td>
+                <td>${formatVal(s.None, total)}</td>
+                <td>${formatVal(s.Glove, total)}</td>
+            </tr>`;
         });
     }
 
