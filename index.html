@@ -16,7 +16,7 @@
         .section-title { border-left: 6px solid #11998e; padding-left: 15px; margin-bottom: 25px; color: #11998e; font-weight: bold; font-size: 1.2rem; }
         .dash-card { background: white; border-radius: 15px; padding: 25px; text-align: center; border-bottom: 4px solid #11998e; height: 100%; }
         .dash-title { font-size: 0.85rem; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; font-weight: bold; }
-        .dash-value { font-size: 1.8rem; font-weight: 800; color: #2c3e50; }
+        .dash-value { font-size: 1.5rem; font-weight: 800; color: #2c3e50; }
         .radio-group-box { background: #fafafa; padding: 18px; border-radius: 12px; border: 1px solid #eee; height: 100%; }
         .other-input { display: none; margin-top: 10px; border-color: #11998e; }
         .btn-check:checked + .btn-outline-primary { background-color: #0d6efd; color: white; }
@@ -97,25 +97,25 @@
         <div class="col-md-2">
             <div class="dash-card">
                 <div class="dash-title">HW Overall</div>
-                <div class="dash-value" id="hw_total">0.0%</div>
+                <div class="dash-value" id="hw_total">0.0% (0/0)</div>
             </div>
         </div>
         <div class="col-md-2">
             <div class="dash-card">
                 <div class="dash-title">HR Overall</div>
-                <div class="dash-value" id="hr_total">0.0%</div>
+                <div class="dash-value" id="hr_total">0.0% (0/0)</div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="dash-card" style="border-bottom-color: #28a745;">
                 <div class="dash-title text-success">Overall Compliance</div>
-                <div class="dash-value text-success" id="comp_rate">0.0%</div>
+                <div class="dash-value text-success" id="comp_rate">0.0% (0/0)</div>
             </div>
         </div>
         <div class="col-md-2">
             <div class="dash-card" style="border-bottom-color: #ffc107;">
                 <div class="dash-title text-warning">อุปกรณ์พร้อมใช้</div>
-                <div class="dash-value text-warning" id="equip_rate">0.0%</div>
+                <div class="dash-value text-warning" id="equip_rate">0.0% (0/0)</div>
             </div>
         </div>
         <div class="col-md-3">
@@ -234,8 +234,14 @@
         const ctxPie = document.getElementById('cleanPieChart').getContext('2d');
         cleanPieChart = new Chart(ctxPie, {
             type: 'pie',
-            data: { labels: ['ล้างมือ (HW+HR)', 'ไม่ล้าง', 'สวมถุงมือ'], datasets: [{ data: [0, 0, 0], backgroundColor: ['#28a745', '#dc3545', '#6c757d'] }] },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 10 } } } } }
+            data: { 
+                labels: ['HW', 'HR', 'ไม่ล้างมือ', 'สวมถุงมือ'], 
+                datasets: [{ 
+                    data: [0, 0, 0, 0], 
+                    backgroundColor: ['#0d6efd', '#0dcaf0', '#dc3545', '#6c757d'] 
+                }] 
+            },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 9 } } } } }
         });
     }
 
@@ -283,19 +289,20 @@
             d.equips.forEach(v => eq += v);
         });
 
-        const totalActions = n * 5;
+        const totalMoments = n * 5;
         const totalHWHR = hw + hr;
 
-        // Dashboard
-        document.getElementById('hw_total').innerText = (totalHWHR > 0 ? ((hw / totalHWHR) * 100).toFixed(1) : "0.0") + "%";
-        document.getElementById('hr_total').innerText = (totalHWHR > 0 ? ((hr / totalHWHR) * 100).toFixed(1) : "0.0") + "%";
-        document.getElementById('comp_rate').innerText = ((totalHWHR / totalActions) * 100).toFixed(1) + "%";
-        document.getElementById('equip_rate').innerText = ((eq / (n * 7)) * 100).toFixed(1) + "%";
+        // Dashboard Updates with Fractions
+        document.getElementById('hw_total').innerText = (totalHWHR > 0 ? ((hw / totalHWHR) * 100).toFixed(1) : "0.0") + `% (${hw}/${totalHWHR})`;
+        document.getElementById('hr_total').innerText = (totalHWHR > 0 ? ((hr / totalHWHR) * 100).toFixed(1) : "0.0") + `% (${hr}/${totalHWHR})`;
+        document.getElementById('comp_rate').innerText = ((totalHWHR / totalMoments) * 100).toFixed(1) + `% (${totalHWHR}/${totalMoments})`;
+        document.getElementById('equip_rate').innerText = ((eq / (n * 7)) * 100).toFixed(1) + `% (${eq}/${n * 7})`;
 
         // Update Charts
         momentChart.data.datasets[0].data = mComp.map(c => ((c / n) * 100).toFixed(1));
         momentChart.update();
-        cleanPieChart.data.datasets[0].data = [totalHWHR, none, glove];
+        
+        cleanPieChart.data.datasets[0].data = [hw, hr, none, glove];
         cleanPieChart.update();
 
         // 5 Moments Table
@@ -305,7 +312,7 @@
             data.forEach(d => s[d.m[idx]]++);
             mBody.innerHTML += `<tr>
                 <td class="text-start fw-bold">${l}</td>
-                <td class="bg-light">${formatVal(s.HW + s.HR, n)}</td>
+                <td class="table-success fw-bold">${formatVal(s.HW + s.HR, n)}</td>
                 <td>${formatVal(s.HW, n)}</td>
                 <td>${formatVal(s.HR, n)}</td>
                 <td>${formatVal(s.None, n)}</td>
@@ -326,7 +333,7 @@
             let s = {HW:0, HR:0, None:0, Glove:0};
             f.forEach(d => d.m.forEach(v => s[v]++));
             let total = f.length * 5;
-            body.innerHTML += `<tr><td>${k}</td><td>${formatVal(s.HW+s.HR, total)}</td><td>${formatVal(s.None, total)}</td><td>${formatVal(s.Glove, total)}</td></tr>`;
+            body.innerHTML += `<tr><td>${k}</td><td class="fw-bold">${formatVal(s.HW+s.HR, total)}</td><td>${formatVal(s.None, total)}</td><td>${formatVal(s.Glove, total)}</td></tr>`;
         });
     }
 
