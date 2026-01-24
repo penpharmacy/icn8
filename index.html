@@ -24,6 +24,9 @@
         .btn-check:checked + .btn-outline-danger { background-color: #dc3545; color: white; }
         .btn-check:checked + .btn-outline-secondary { background-color: #6c757d; color: white; }
         @media print { .no-print { display: none !important; } .card { box-shadow: none; border: 1px solid #eee; } }
+
+        /* เพิ่มส่วนการซ่อน Report เริ่มต้น */
+        #main-report-container { display: none; }
     </style>
 </head>
 <body>
@@ -93,129 +96,131 @@
         </div>
     </div>
 
-    <div class="row g-3 mb-4">
-        <div class="col-md-2">
-            <div class="dash-card">
-                <div class="dash-title">สัดส่วนทำความสะอาดมือด้วยน้ำสบู่</div>
-                <div class="dash-value" id="hw_total">0.0% (0/0)</div>
+    <div id="main-report-container">
+        <div class="row g-3 mb-4">
+            <div class="col-md-2">
+                <div class="dash-card">
+                    <div class="dash-title">สัดส่วนทำความสะอาดมือด้วยน้ำสบู่</div>
+                    <div class="dash-value" id="hw_total">0.0% (0/0)</div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="dash-card">
+                    <div class="dash-title">สัดส่วนทำความสะอาดมือด้วยHR</div>
+                    <div class="dash-value" id="hr_total">0.0% (0/0)</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="dash-card" style="border-bottom-color: #28a745;">
+                    <div class="dash-title text-success">อัตราการทำความสะอาดมือภาพรวม</div>
+                    <div class="dash-value text-success" id="comp_rate">0.0% (0/0)</div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="dash-card" style="border-bottom-color: #ffc107;">
+                    <div class="dash-title text-warning">อุปกรณ์พร้อมใช้</div>
+                    <div class="dash-value text-warning" id="equip_rate">0.0% (0/0)</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="dash-card" style="border-bottom-color: #0d6efd;">
+                    <div class="dash-title text-primary">สัดส่วนการทำความสะอาดมือ(ครั้ง)</div>
+                    <div style="height: 120px;"><canvas id="cleanPieChart"></canvas></div>
+                </div>
             </div>
         </div>
-        <div class="col-md-2">
-            <div class="dash-card">
-                <div class="dash-title">สัดส่วนทำความสะอาดมือด้วยHR</div>
-                <div class="dash-value" id="hr_total">0.0% (0/0)</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="dash-card" style="border-bottom-color: #28a745;">
-                <div class="dash-title text-success">อัตราการทำความสะอาดมือภาพรวม</div>
-                <div class="dash-value text-success" id="comp_rate">0.0% (0/0)</div>
-            </div>
-        </div>
-        <div class="col-md-2">
-            <div class="dash-card" style="border-bottom-color: #ffc107;">
-                <div class="dash-title text-warning">อุปกรณ์พร้อมใช้</div>
-                <div class="dash-value text-warning" id="equip_rate">0.0% (0/0)</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="dash-card" style="border-bottom-color: #0d6efd;">
-                <div class="dash-title text-primary">สัดส่วนการทำความสะอาดมือ(ครั้ง)</div>
-                <div style="height: 120px;"><canvas id="cleanPieChart"></canvas></div>
-            </div>
-        </div>
-    </div>
 
-    <div class="row g-3 mb-4">
-        <div class="col-lg-6">
-            <div class="card p-4 h-100">
-                <h5 class="section-title">อัตราทำความสะอาดมือแต่ละโอกาส 5 Moments (HR+HW) (%)</h5>
-                <div style="height: 350px;"><canvas id="momentChart"></canvas></div>
+        <div class="row g-3 mb-4">
+            <div class="col-lg-6">
+                <div class="card p-4 h-100">
+                    <h5 class="section-title">อัตราทำความสะอาดมือแต่ละโอกาส 5 Moments (HR+HW) (%)</h5>
+                    <div style="height: 350px;"><canvas id="momentChart"></canvas></div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card p-4 h-100">
+                    <h5 class="section-title">อัตราการทำความสะอาดมือแต่ละโอกาส แยกราย Moment</h5>
+                    <div class="table-responsive">
+                        <table class="table table-hover table-bordered text-center align-middle" style="font-size: 0.9rem;">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="text-start">Moment</th>
+                                    <th class="table-success">HW+HR</th>
+                                    <th>HW</th>
+                                    <th>HR</th>
+                                    <th>ไม่ล้างมือ</th>
+                                    <th>สวมถุงมือ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="momentTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="col-lg-6">
-            <div class="card p-4 h-100">
-                <h5 class="section-title">อัตราการทำความสะอาดมือแต่ละโอกาส แยกราย Moment</h5>
+
+        <div class="text-end mb-4 no-print">
+            <button class="btn btn-outline-success me-2" onclick="exportToExcel()"><i class="fas fa-file-excel"></i> Export Excel</button>
+            <button class="btn btn-outline-dark" onclick="window.print()"><i class="fas fa-print"></i> พิมพ์รายงาน</button>
+        </div>
+
+        <div id="reportArea">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card p-4">
+                        <h5 class="section-title">อัตราการทำความสะอาดมือแยกตามแผนก</h5>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered text-center align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>แผนก</th>
+                                        <th class="table-success">HW+HR</th>
+                                        <th>HW</th>
+                                        <th>HR</th>
+                                        <th>ไม่ล้างมือ</th>
+                                        <th>สวมถุงมือ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="deptTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card p-4">
+                        <h5 class="section-title">อัตราการทำความสะอาดมือแยกตามวิชาชีพ</h5>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered text-center align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>วิชาชีพ</th>
+                                        <th class="table-success">HW+HR</th>
+                                        <th>HW</th>
+                                        <th>HR</th>
+                                        <th>ไม่ล้างมือ</th>
+                                        <th>สวมถุงมือ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="roleTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card p-4">
+                <h5 class="section-title">ความพร้อมอุปกรณ์แยกตามแผนก (%)</h5>
                 <div class="table-responsive">
-                    <table class="table table-hover table-bordered text-center align-middle" style="font-size: 0.9rem;">
-                        <thead class="table-light">
+                    <table class="table table-sm table-bordered text-center align-middle">
+                        <thead class="small table-light">
                             <tr>
-                                <th class="text-start">Moment</th>
-                                <th class="table-success">HW+HR</th>
-                                <th>HW</th>
-                                <th>HR</th>
-                                <th>ไม่ล้างมือ</th>
-                                <th>สวมถุงมือ</th>
+                                <th>แผนก</th>
+                                <th>อ่างล้างมือ</th><th>สบู่เหลว</th><th>4%CHG</th><th>Alcohol hand rub</th><th>กระดาษเช็ดมือ</th><th>โปสเตอร์</th><th>ถังขยะทิ้งกระดาษเช็ดมือ</th>
                             </tr>
                         </thead>
-                        <tbody id="momentTableBody"></tbody>
+                        <tbody id="equipDeptTableBody"></tbody>
                     </table>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="text-end mb-4 no-print">
-        <button class="btn btn-outline-success me-2" onclick="exportToExcel()"><i class="fas fa-file-excel"></i> Export Excel</button>
-        <button class="btn btn-outline-dark" onclick="window.print()"><i class="fas fa-print"></i> พิมพ์รายงาน</button>
-    </div>
-
-    <div id="reportArea">
-        <div class="row">
-            <div class="col-md-6">
-                <div class="card p-4">
-                    <h5 class="section-title">อัตราการทำความสะอาดมือแยกตามแผนก</h5>
-                    <div class="table-responsive">
-                        <table class="table table-sm table-bordered text-center align-middle">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>แผนก</th>
-                                    <th class="table-success">HW+HR</th>
-                                    <th>HW</th>
-                                    <th>HR</th>
-                                    <th>ไม่ล้างมือ</th>
-                                    <th>สวมถุงมือ</th>
-                                </tr>
-                            </thead>
-                            <tbody id="deptTableBody"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card p-4">
-                    <h5 class="section-title">อัตราการทำความสะอาดมือแยกตามวิชาชีพ</h5>
-                    <div class="table-responsive">
-                        <table class="table table-sm table-bordered text-center align-middle">
-                            <thead class="table-light">
-                                <tr>
-                                    <th>วิชาชีพ</th>
-                                    <th class="table-success">HW+HR</th>
-                                    <th>HW</th>
-                                    <th>HR</th>
-                                    <th>ไม่ล้างมือ</th>
-                                    <th>สวมถุงมือ</th>
-                                </tr>
-                            </thead>
-                            <tbody id="roleTableBody"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="card p-4">
-            <h5 class="section-title">ความพร้อมอุปกรณ์แยกตามแผนก (%)</h5>
-            <div class="table-responsive">
-                <table class="table table-sm table-bordered text-center align-middle">
-                    <thead class="small table-light">
-                        <tr>
-                            <th>แผนก</th>
-                            <th>อ่างล้างมือ</th><th>สบู่เหลว</th><th>4%CHG</th><th>Alcohol hand rub</th><th>กระดาษเช็ดมือ</th><th>โปสเตอร์</th><th>ถังขยะทิ้งกระดาษเช็ดมือ</th>
-                        </tr>
-                    </thead>
-                    <tbody id="equipDeptTableBody"></tbody>
-                </table>
             </div>
         </div>
     </div>
@@ -271,6 +276,8 @@
         document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false); 
         document.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false); 
         document.getElementById('obsDate').value = ""; document.getElementById('obsTime').value = "";
+        toggleOther('deptOther', false);
+        toggleOther('roleOther', false);
     }
 
     function saveData() {
@@ -283,7 +290,6 @@
         let dVal = dRadio.value === "อื่นๆ" ? (document.getElementById('deptOther').value || "อื่นๆ") : dRadio.value;
         let rVal = rRadio.value === "อื่นๆ" ? (document.getElementById('roleOther').value || "อื่นๆ") : rRadio.value;
         
-        // แก้ไข: ส่งค่าว่าง "" แทนคำว่า "Pending" เพื่อไม่ให้แสดงในฐานข้อมูล
         const moments = [0,1,2,3,4].map(i => {
             const el = document.querySelector(`input[name="m${i}"]:checked`);
             return el ? el.value : ""; 
@@ -302,7 +308,17 @@
     };
 
     function render(data) {
-        let n_records = data.length; if(n_records === 0) return;
+        let n_records = data.length; 
+        
+        // --- ส่วนที่เพิ่มเพื่อควบคุมการแสดงผลตามเงื่อนไข ---
+        const container = document.getElementById('main-report-container');
+        if(n_records === 0) {
+            container.style.display = "none";
+            return;
+        } else {
+            container.style.display = "block";
+        }
+        // -------------------------------------------
 
         let hw = 0, hr = 0, none = 0, glove = 0, eq = 0;
         let totalOpp = 0;
@@ -311,7 +327,6 @@
 
         data.forEach(d => {
             d.m.forEach((v, idx) => { 
-                // แก้ไข Logic: ข้ามทั้ง Pending และช่องว่าง ไม่ให้นับเป็นตัวหาร
                 if (v && v !== "Pending" && v !== "") {
                     totalOpp++;
                     mTotal[idx]++;
