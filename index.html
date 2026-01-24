@@ -126,9 +126,33 @@
         </div>
     </div>
 
-    <div class="card p-4">
-        <h5 class="section-title">อัตราทำความสะอาดมือแต่ละโอกาส 5 Moments (HR+HW) (%)</h5>
-        <div style="height: 300px;"><canvas id="momentChart"></canvas></div>
+    <div class="row g-3 mb-4">
+        <div class="col-lg-6">
+            <div class="card p-4 h-100">
+                <h5 class="section-title">อัตราทำความสะอาดมือแต่ละโอกาส 5 Moments (HR+HW) (%)</h5>
+                <div style="height: 350px;"><canvas id="momentChart"></canvas></div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card p-4 h-100">
+                <h5 class="section-title">สรุปตาม 5 Moments (ตัวหารรวมทุกกิจกรรม)</h5>
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered text-center align-middle" style="font-size: 0.9rem;">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="text-start">Moment</th>
+                                <th class="table-success">HW+HR</th>
+                                <th>HW</th>
+                                <th>HR</th>
+                                <th>ไม่ล้าง</th>
+                                <th>ถุงมือ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="momentTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="text-end mb-4 no-print">
@@ -137,25 +161,6 @@
     </div>
 
     <div id="reportArea">
-        <div class="card p-4">
-            <h5 class="section-title">สรุปตาม 5 Moments (ตัวหารรวมทุกกิจกรรม)</h5>
-            <div class="table-responsive">
-                <table class="table table-hover table-bordered text-center align-middle">
-                    <thead class="table-light">
-                        <tr>
-                            <th class="text-start">Moment</th>
-                            <th class="table-success">HW+HR (%)</th>
-                            <th>HW (%)</th>
-                            <th>HR (%)</th>
-                            <th>ไม่ล้างมือ (%)</th>
-                            <th>สวมถุงมือ (%)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="momentTableBody"></tbody>
-                </table>
-            </div>
-        </div>
-
         <div class="row">
             <div class="col-md-6">
                 <div class="card p-4">
