@@ -16,7 +16,7 @@
         .section-title { border-left: 6px solid #11998e; padding-left: 15px; margin-bottom: 25px; color: #11998e; font-weight: bold; font-size: 1.2rem; }
         .dash-card { background: white; border-radius: 15px; padding: 25px; text-align: center; border-bottom: 4px solid #11998e; height: 100%; }
         .dash-title { font-size: 0.85rem; color: #666; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; font-weight: bold; }
-        .dash-value { font-size: 2rem; font-weight: 800; color: #2c3e50; }
+        .dash-value { font-size: 1.8rem; font-weight: 800; color: #2c3e50; }
         .radio-group-box { background: #fafafa; padding: 18px; border-radius: 12px; border: 1px solid #eee; height: 100%; }
         .other-input { display: none; margin-top: 10px; border-color: #11998e; }
         .btn-check:checked + .btn-outline-primary { background-color: #0d6efd; color: white; }
@@ -107,30 +107,28 @@
             </div>
         </div>
         <div class="col-md-3">
-            <div class="dash-card" style="border-bottom-color: #0d6efd;">
-                <div class="dash-title text-primary">สัดส่วนการทำความสะอาดมือ (ครั้ง)</div>
-                <div class="dash-value text-primary" id="clean_count">0 / 0</div>
-            </div>
-        </div>
-        <div class="col-md-2">
             <div class="dash-card" style="border-bottom-color: #28a745;">
                 <div class="dash-title text-success">Overall Compliance</div>
                 <div class="dash-value text-success" id="comp_rate">0.0%</div>
             </div>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-2">
             <div class="dash-card" style="border-bottom-color: #ffc107;">
-                <div class="dash-title text-warning">ความพร้อมใช้อุปกรณ์</div>
+                <div class="dash-title text-warning">อุปกรณ์พร้อมใช้</div>
                 <div class="dash-value text-warning" id="equip_rate">0.0%</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="dash-card" style="border-bottom-color: #0d6efd;">
+                <div class="dash-title text-primary">สัดส่วนกิจกรรมทั้งหมด (ครั้ง)</div>
+                <div style="height: 120px;"><canvas id="cleanPieChart"></canvas></div>
             </div>
         </div>
     </div>
 
     <div class="card p-4">
         <h5 class="section-title">อัตราทำความสะอาดมือแต่ละโอกาส 5 Moments (HR+HW) (%)</h5>
-        <div style="height: 300px;">
-            <canvas id="momentChart"></canvas>
-        </div>
+        <div style="height: 300px;"><canvas id="momentChart"></canvas></div>
     </div>
 
     <div class="text-end mb-4 no-print">
@@ -140,11 +138,18 @@
 
     <div id="reportArea">
         <div class="card p-4">
-            <h5 class="section-title">สรุปตาม 5 Moments</h5>
+            <h5 class="section-title">สรุปตาม 5 Moments (ตัวหารรวมทุกกิจกรรม)</h5>
             <div class="table-responsive">
                 <table class="table table-hover table-bordered text-center align-middle">
                     <thead class="table-light">
-                        <tr><th class="text-start">Moment</th><th>HW (%)</th><th>HR (%)</th><th>ไม่ล้างมือ (%)</th><th>สวมถุงมือ (%)</th></tr>
+                        <tr>
+                            <th class="text-start">Moment</th>
+                            <th class="table-success">HW+HR (%)</th>
+                            <th>HW (%)</th>
+                            <th>HR (%)</th>
+                            <th>ไม่ล้างมือ (%)</th>
+                            <th>สวมถุงมือ (%)</th>
+                        </tr>
                     </thead>
                     <tbody id="momentTableBody"></tbody>
                 </table>
@@ -156,7 +161,7 @@
                 <div class="card p-4">
                     <h5 class="section-title">แยกตามแผนก</h5>
                     <table class="table table-sm table-bordered text-center align-middle">
-                        <thead><tr><th>แผนก</th><th>HW(%)</th><th>HR(%)</th><th>ไม่ล้างมือ(%)</th><th>สวมถุงมือ(%)</th></tr></thead>
+                        <thead><tr><th>แผนก</th><th>HW+HR(%)</th><th>ไม่ล้าง(%)</th><th>ถุงมือ(%)</th></tr></thead>
                         <tbody id="deptTableBody"></tbody>
                     </table>
                 </div>
@@ -165,7 +170,7 @@
                 <div class="card p-4">
                     <h5 class="section-title">แยกตามวิชาชีพ</h5>
                     <table class="table table-sm table-bordered text-center align-middle">
-                        <thead><tr><th>วิชาชีพ</th><th>HW(%)</th><th>HR(%)</th><th>ไม่ล้างมือ(%)</th><th>สวมถุงมือ(%)</th></tr></thead>
+                        <thead><tr><th>วิชาชีพ</th><th>HW+HR(%)</th><th>ไม่ล้าง(%)</th><th>ถุงมือ(%)</th></tr></thead>
                         <tbody id="roleTableBody"></tbody>
                     </table>
                 </div>
@@ -179,13 +184,7 @@
                     <thead class="small table-light">
                         <tr>
                             <th>แผนก</th>
-                            <th>อ่างล้างมือ</th>
-                            <th>สบู่เหลว</th>
-                            <th>4% Chlorhexidine</th>
-                            <th>Alcohol Hand Rub</th>
-                            <th>กระดาษเช็ดมือ</th>
-                            <th>โปสเตอร์สอนล้างมือ</th>
-                            <th>ถังขยะ</th>
+                            <th>อ่าง</th><th>สบู่</th><th>CHG</th><th>Alcohol</th><th>กระดาษ</th><th>โปสเตอร์</th><th>ถังขยะ</th>
                         </tr>
                     </thead>
                     <tbody id="equipDeptTableBody"></tbody>
@@ -202,6 +201,7 @@
     const momentLabels = ["ก่อนสัมผัสผู้ป่วย", "ก่อนทำหัตถการปลอดเชื้อ", "หลังสัมผัสสารคัดหลั่งผู้ป่วย", "หลังสัมผัสผู้ป่วย", "หลังสัมผัสสิ่งรอบตัวผู้ป่วย"];
     let database = [];
     let momentChart = null;
+    let cleanPieChart = null;
 
     window.onload = function() {
         const mDiv = document.getElementById('momentInputList');
@@ -211,60 +211,38 @@
                 <div class="p-3 border rounded-3 bg-white">
                     <label class="small fw-bold d-block mb-2 text-dark">${i+1}. ${label}</label>
                     <div class="d-flex flex-wrap gap-2">
-                        <input type="radio" class="btn-check" name="m${i}" id="m${i}hw" value="HW">
-                        <label class="btn btn-outline-primary btn-sm px-3" for="m${i}hw">HW</label>
-                        <input type="radio" class="btn-check" name="m${i}" id="m${i}hr" value="HR">
-                        <label class="btn btn-outline-info btn-sm px-3" for="m${i}hr">HR</label>
-                        <input type="radio" class="btn-check" name="m${i}" id="m${i}no" value="None">
-                        <label class="btn btn-outline-danger btn-sm px-2" for="m${i}no">ไม่ล้างมือ</label>
-                        <input type="radio" class="btn-check" name="m${i}" id="m${i}gl" value="Glove">
-                        <label class="btn btn-outline-secondary btn-sm px-2" for="m${i}gl">สวมถุงมือ</label>
+                        <input type="radio" class="btn-check" name="m${i}" id="m${i}hw" value="HW"><label class="btn btn-outline-primary btn-sm px-3" for="m${i}hw">HW</label>
+                        <input type="radio" class="btn-check" name="m${i}" id="m${i}hr" value="HR"><label class="btn btn-outline-info btn-sm px-3" for="m${i}hr">HR</label>
+                        <input type="radio" class="btn-check" name="m${i}" id="m${i}no" value="None"><label class="btn btn-outline-danger btn-sm px-2" for="m${i}no">ไม่ล้าง</label>
+                        <input type="radio" class="btn-check" name="m${i}" id="m${i}gl" value="Glove"><label class="btn btn-outline-secondary btn-sm px-2" for="m${i}gl">ถุงมือ</label>
                     </div>
                 </div>
             </div>`;
         });
-
-        initChart();
-        fetch(SCRIPT_URL)
-            .then(res => res.json())
-            .then(data => {
-                database = data;
-                render(database);
-            })
-            .catch(err => {
-                console.log("Fetch Error / Local Mode");
-                render(database);
-            });
+        initCharts();
+        fetch(SCRIPT_URL).then(res => res.json()).then(data => { database = data; render(database); }).catch(err => render(database));
     };
 
-    function initChart() {
-        const ctx = document.getElementById('momentChart').getContext('2d');
-        momentChart = new Chart(ctx, {
+    function initCharts() {
+        const ctxBar = document.getElementById('momentChart').getContext('2d');
+        momentChart = new Chart(ctxBar, {
             type: 'bar',
-            data: {
-                labels: ["M1", "M2", "M3", "M4", "M5"],
-                datasets: [{
-                    label: 'Compliance Rate (%)',
-                    data: [0, 0, 0, 0, 0],
-                    backgroundColor: '#11998e',
-                    borderRadius: 5
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: { y: { beginAtZero: true, max: 100 } },
-                plugins: { legend: { display: false } }
-            }
+            data: { labels: ["M1", "M2", "M3", "M4", "M5"], datasets: [{ label: 'Compliance (%)', data: [0,0,0,0,0], backgroundColor: '#11998e', borderRadius: 5 }] },
+            options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } }, plugins: { legend: { display: false } } }
+        });
+
+        const ctxPie = document.getElementById('cleanPieChart').getContext('2d');
+        cleanPieChart = new Chart(ctxPie, {
+            type: 'pie',
+            data: { labels: ['ล้างมือ (HW+HR)', 'ไม่ล้าง', 'สวมถุงมือ'], datasets: [{ data: [0, 0, 0], backgroundColor: ['#28a745', '#dc3545', '#6c757d'] }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 10, font: { size: 10 } } } } }
         });
     }
 
     function toggleOther(id, show) { document.getElementById(id).style.display = show ? "block" : "none"; }
-
-    function clearForm() {
-        document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
-        document.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
-        document.querySelectorAll('.other-input').forEach(i => { i.value = ""; i.style.display = "none"; });
+    function clearForm() { 
+        document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false); 
+        document.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false); 
         document.getElementById('obsDate').value = ""; document.getElementById('obsTime').value = "";
     }
 
@@ -273,75 +251,66 @@
         const dTime = document.getElementById('obsTime').value;
         const dRadio = document.querySelector('input[name="deptRadio"]:checked');
         const rRadio = document.querySelector('input[name="roleRadio"]:checked');
-
         if (!dDate || !dTime || !dRadio || !rRadio) return alert("กรุณากรอกข้อมูลให้ครบ");
-        for (let i = 0; i < 5; i++) { 
-            if (!document.querySelector(`input[name="m${i}"]:checked`)) {
-                return alert(`กรุณาประเมิน Moment ที่ ${i+1}`); 
-            }
-        }
-
-        if (!confirm("คุณต้องการบันทึกข้อมูลนี้ลงในระบบใช่หรือไม่?")) return; 
-
+        for (let i = 0; i < 5; i++) { if (!document.querySelector(`input[name="m${i}"]:checked`)) return alert(`กรุณาประเมิน Moment ที่ ${i+1}`); }
+        
         let dVal = dRadio.value === "อื่นๆ" ? (document.getElementById('deptOther').value || "อื่นๆ") : dRadio.value;
         let rVal = rRadio.value === "อื่นๆ" ? (document.getElementById('roleOther').value || "อื่นๆ") : rRadio.value;
-
-        const record = {
-            obsDate: dDate, obsTime: dTime, dept: dVal, role: rVal,
-            m: [0,1,2,3,4].map(i => document.querySelector(`input[name="m${i}"]:checked`).value),
-            equips: Array.from(document.querySelectorAll('.equip')).map(e => e.checked ? 1 : 0)
-        };
-
+        const record = { obsDate: dDate, obsTime: dTime, dept: dVal, role: rVal, m: [0,1,2,3,4].map(i => document.querySelector(`input[name="m${i}"]:checked`).value), equips: Array.from(document.querySelectorAll('.equip')).map(e => e.checked ? 1 : 0) };
         fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(record) });
-        database.push(record);
-        render(database);
-        alert("บันทึกข้อมูลเรียบร้อยแล้ว"); 
-        clearForm();
+        database.push(record); render(database); alert("บันทึกข้อมูลเรียบร้อยแล้ว"); clearForm();
     }
 
     const formatVal = (count, total, isInteger = false) => {
         let pct = (total === 0) ? 0 : (count / total) * 100;
         let textColor = pct === 0 ? '#dc3545' : (pct === 100 ? '#198754' : '#333');
         let displayPct = isInteger ? pct.toFixed(0) : pct.toFixed(1);
-        return `<span style="color: ${textColor}; font-weight: bold;">${displayPct}%</span><br>
-                <small class='text-muted'>(${count}/${total})</small>`;
+        return `<span style="color: ${textColor}; font-weight: bold;">${displayPct}%</span><br><small class='text-muted'>(${count}/${total})</small>`;
     };
 
     function render(data) {
-        let n = data.length;
-        if(n === 0) return;
-
-        let hw = 0, hr = 0, eq = 0;
-        let momentCompliance = [0,0,0,0,0];
+        let n = data.length; if(n === 0) return;
+        let hw = 0, hr = 0, none = 0, glove = 0, eq = 0;
+        let mComp = [0,0,0,0,0];
 
         data.forEach(d => {
             d.m.forEach((v, idx) => { 
-                if(v==='HW') { hw++; momentCompliance[idx]++; }
-                if(v==='HR') { hr++; momentCompliance[idx]++; }
+                if(v==='HW') { hw++; mComp[idx]++; }
+                else if(v==='HR') { hr++; mComp[idx]++; }
+                else if(v==='None') none++;
+                else if(v==='Glove') glove++;
             });
             d.equips.forEach(v => eq += v);
         });
 
-        const totalHandActions = hw + hr;
-        const totalOpportunities = n * 5;
+        const totalActions = n * 5;
+        const totalHWHR = hw + hr;
 
-        // Dashboard Updates
-        document.getElementById('hw_total').innerText = (totalHandActions > 0 ? ((hw / totalHandActions) * 100).toFixed(1) : "0.0") + "%";
-        document.getElementById('hr_total').innerText = (totalHandActions > 0 ? ((hr / totalHandActions) * 100).toFixed(1) : "0.0") + "%";
-        document.getElementById('clean_count').innerText = `${totalHandActions} / ${totalOpportunities}`;
-        document.getElementById('comp_rate').innerText = ((totalHandActions / totalOpportunities) * 100).toFixed(1) + "%";
+        // Dashboard
+        document.getElementById('hw_total').innerText = (totalHWHR > 0 ? ((hw / totalHWHR) * 100).toFixed(1) : "0.0") + "%";
+        document.getElementById('hr_total').innerText = (totalHWHR > 0 ? ((hr / totalHWHR) * 100).toFixed(1) : "0.0") + "%";
+        document.getElementById('comp_rate').innerText = ((totalHWHR / totalActions) * 100).toFixed(1) + "%";
         document.getElementById('equip_rate').innerText = ((eq / (n * 7)) * 100).toFixed(1) + "%";
 
-        // Update Chart
-        momentChart.data.datasets[0].data = momentCompliance.map(c => ((c / n) * 100).toFixed(1));
+        // Update Charts
+        momentChart.data.datasets[0].data = mComp.map(c => ((c / n) * 100).toFixed(1));
         momentChart.update();
+        cleanPieChart.data.datasets[0].data = [totalHWHR, none, glove];
+        cleanPieChart.update();
 
-        // Update Tables
+        // 5 Moments Table
         const mBody = document.getElementById('momentTableBody'); mBody.innerHTML = '';
         momentLabels.forEach((l, idx) => {
             let s = {HW:0, HR:0, None:0, Glove:0};
             data.forEach(d => s[d.m[idx]]++);
-            mBody.innerHTML += `<tr><td class="text-start fw-bold">${l}</td><td>${formatVal(s.HW, n)}</td><td>${formatVal(s.HR, n)}</td><td>${formatVal(s.None, n)}</td><td>${formatVal(s.Glove, n)}</td></tr>`;
+            mBody.innerHTML += `<tr>
+                <td class="text-start fw-bold">${l}</td>
+                <td class="bg-light">${formatVal(s.HW + s.HR, n)}</td>
+                <td>${formatVal(s.HW, n)}</td>
+                <td>${formatVal(s.HR, n)}</td>
+                <td>${formatVal(s.None, n)}</td>
+                <td>${formatVal(s.Glove, n)}</td>
+            </tr>`;
         });
 
         renderTable(data, 'dept', 'deptTableBody');
@@ -356,7 +325,8 @@
             let f = data.filter(d => d[field] === k);
             let s = {HW:0, HR:0, None:0, Glove:0};
             f.forEach(d => d.m.forEach(v => s[v]++));
-            body.innerHTML += `<tr><td>${k}</td><td>${formatVal(s.HW, f.length*5)}</td><td>${formatVal(s.HR, f.length*5)}</td><td>${formatVal(s.None, f.length*5)}</td><td>${formatVal(s.Glove, f.length*5)}</td></tr>`;
+            let total = f.length * 5;
+            body.innerHTML += `<tr><td>${k}</td><td>${formatVal(s.HW+s.HR, total)}</td><td>${formatVal(s.None, total)}</td><td>${formatVal(s.Glove, total)}</td></tr>`;
         });
     }
 
@@ -366,24 +336,16 @@
         depts.forEach(dn => {
             let f = data.filter(d => d.dept === dn);
             let row = `<tr><td class="fw-bold">${dn}</td>`;
-            for(let i=0; i<7; i++) {
-                let count = f.filter(x => x.equips[i] === 1).length;
-                row += `<td>${formatVal(count, f.length, true)}</td>`;
-            }
+            for(let i=0; i<7; i++) row += `<td>${formatVal(f.filter(x => x.equips[i] === 1).length, f.length, true)}</td>`;
             body.innerHTML += row + "</tr>";
         });
     }
 
     function exportToExcel() {
-        if(database.length === 0) return alert("ไม่มีข้อมูลสำหรับการส่งออก");
-        const ws = XLSX.utils.json_to_sheet(database.map(d => ({
-            "วันที่": d.obsDate, "เวลา": d.obsTime, "แผนก": d.dept, "วิชาชีพ": d.role,
-            "M1": d.m[0], "M2": d.m[1], "M3": d.m[2], "M4": d.m[3], "M5": d.m[4],
-            "อ่างล้างมือ": d.equips[0], "สบู่เหลว": d.equips[1], "4% CHG": d.equips[2], "Alcohol": d.equips[3],
-            "กระดาษ": d.equips[4], "โปสเตอร์": d.equips[5], "ถังขยะ": d.equips[6]
-        })));
-        const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "AuditData"); 
-        XLSX.writeFile(wb, `IC_HandHygiene_${new Date().toISOString().slice(0,10)}.xlsx`);
+        if(database.length === 0) return alert("ไม่มีข้อมูล");
+        const ws = XLSX.utils.json_to_sheet(database.map(d => ({ "วันที่": d.obsDate, "แผนก": d.dept, "วิชาชีพ": d.role, "M1": d.m[0], "M2": d.m[1], "M3": d.m[2], "M4": d.m[3], "M5": d.m[4] })));
+        const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "AuditData");
+        XLSX.writeFile(wb, `IC_Audit_${new Date().toISOString().slice(0,10)}.xlsx`);
     }
 </script>
 </body>
