@@ -76,7 +76,7 @@
                     <div class="col-6">
                         <div class="form-check mb-2"><input class="form-check-input equip" type="checkbox" id="e4"><label class="small">กระดาษเช็ดมือ</label></div>
                         <div class="form-check mb-2"><input class="form-check-input equip" type="checkbox" id="e5"><label class="small">โปสเตอร์สอนล้างมือ</label></div>
-                        <div class="form-check mb-2"><input class="form-check-input equip" type="checkbox" id="e6"><label class="small">ถังขยะ</label></div>
+                        <div class="form-check mb-2"><input class="form-check-input equip" type="checkbox" id="e6"><label class="small">ถังขยะทิ้งกระดาษเช็ดมือ</label></div>
                     </div>
                 </div>
             </div>
@@ -96,19 +96,19 @@
     <div class="row g-3 mb-4">
         <div class="col-md-2">
             <div class="dash-card">
-                <div class="dash-title">HW Overall</div>
+                <div class="dash-title">สัดส่วนทำความสะอาดมือด้วยน้ำสบู่</div>
                 <div class="dash-value" id="hw_total">0.0% (0/0)</div>
             </div>
         </div>
         <div class="col-md-2">
             <div class="dash-card">
-                <div class="dash-title">HR Overall</div>
+                <div class="dash-title">สัดส่วนทำความสะอาดมือด้วยHR</div>
                 <div class="dash-value" id="hr_total">0.0% (0/0)</div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="dash-card" style="border-bottom-color: #28a745;">
-                <div class="dash-title text-success">Overall Compliance</div>
+                <div class="dash-title text-success">อัตราการทำความสะอาดมือภาพรวม</div>
                 <div class="dash-value text-success" id="comp_rate">0.0% (0/0)</div>
             </div>
         </div>
@@ -120,7 +120,7 @@
         </div>
         <div class="col-md-3">
             <div class="dash-card" style="border-bottom-color: #0d6efd;">
-                <div class="dash-title text-primary">สัดส่วนกิจกรรมทั้งหมด (ครั้ง)</div>
+                <div class="dash-title text-primary">สัดส่วนการทำความสะอาดมือ(ครั้ง)</div>
                 <div style="height: 120px;"><canvas id="cleanPieChart"></canvas></div>
             </div>
         </div>
@@ -135,7 +135,7 @@
         </div>
         <div class="col-lg-6">
             <div class="card p-4 h-100">
-                <h5 class="section-title">สรุปตาม 5 Moments (ตัวหารรวมทุกกิจกรรม)</h5>
+                <h5 class="section-title">อัตราการทำความสะอาดมือแต่ละโอกาส แยกราย Moment</h5>
                 <div class="table-responsive">
                     <table class="table table-hover table-bordered text-center align-middle" style="font-size: 0.9rem;">
                         <thead class="table-light">
@@ -144,8 +144,8 @@
                                 <th class="table-success">HW+HR</th>
                                 <th>HW</th>
                                 <th>HR</th>
-                                <th>ไม่ล้าง</th>
-                                <th>ถุงมือ</th>
+                                <th>ไม่ล้างมือ</th>
+                                <th>สวมถุงมือ</th>
                             </tr>
                         </thead>
                         <tbody id="momentTableBody"></tbody>
@@ -164,7 +164,7 @@
         <div class="row">
             <div class="col-md-6">
                 <div class="card p-4">
-                    <h5 class="section-title">แยกตามแผนก</h5>
+                    <h5 class="section-title">อัตราการทำความสะอาดมือแยกตามแผนก</h5>
                     <div class="table-responsive">
                         <table class="table table-sm table-bordered text-center align-middle">
                             <thead class="table-light">
@@ -173,8 +173,8 @@
                                     <th class="table-success">HW+HR</th>
                                     <th>HW</th>
                                     <th>HR</th>
-                                    <th>ไม่ล้าง</th>
-                                    <th>ถุงมือ</th>
+                                    <th>ไม่ล้างมือ</th>
+                                    <th>สวมถุงมือ</th>
                                 </tr>
                             </thead>
                             <tbody id="deptTableBody"></tbody>
@@ -184,7 +184,7 @@
             </div>
             <div class="col-md-6">
                 <div class="card p-4">
-                    <h5 class="section-title">แยกตามวิชาชีพ</h5>
+                    <h5 class="section-title">อัตราการทำความสะอาดมือแยกตามวิชาชีพ</h5>
                     <div class="table-responsive">
                         <table class="table table-sm table-bordered text-center align-middle">
                             <thead class="table-light">
@@ -193,8 +193,8 @@
                                     <th class="table-success">HW+HR</th>
                                     <th>HW</th>
                                     <th>HR</th>
-                                    <th>ไม่ล้าง</th>
-                                    <th>ถุงมือ</th>
+                                    <th>ไม่ล้างมือ</th>
+                                    <th>สวมถุงมือ</th>
                                 </tr>
                             </thead>
                             <tbody id="roleTableBody"></tbody>
@@ -211,7 +211,7 @@
                     <thead class="small table-light">
                         <tr>
                             <th>แผนก</th>
-                            <th>อ่าง</th><th>สบู่</th><th>CHG</th><th>Alcohol</th><th>กระดาษ</th><th>โปสเตอร์</th><th>ถังขยะ</th>
+                            <th>อ่างล้างมือ</th><th>สบู่เหลว</th><th>4%CHG</th><th>Alcohol hand rub</th><th>กระดาษเช็ดมือ</th><th>โปสเตอร์</th><th>ถังขยะทิ้งกระดาษเช็ดมือ</th>
                         </tr>
                     </thead>
                     <tbody id="equipDeptTableBody"></tbody>
@@ -240,8 +240,8 @@
                     <div class="d-flex flex-wrap gap-2">
                         <input type="radio" class="btn-check" name="m${i}" id="m${i}hw" value="HW"><label class="btn btn-outline-primary btn-sm px-3" for="m${i}hw">HW</label>
                         <input type="radio" class="btn-check" name="m${i}" id="m${i}hr" value="HR"><label class="btn btn-outline-info btn-sm px-3" for="m${i}hr">HR</label>
-                        <input type="radio" class="btn-check" name="m${i}" id="m${i}no" value="None"><label class="btn btn-outline-danger btn-sm px-2" for="m${i}no">ไม่ล้าง</label>
-                        <input type="radio" class="btn-check" name="m${i}" id="m${i}gl" value="Glove"><label class="btn btn-outline-secondary btn-sm px-2" for="m${i}gl">ถุงมือ</label>
+                        <input type="radio" class="btn-check" name="m${i}" id="m${i}no" value="None"><label class="btn btn-outline-danger btn-sm px-2" for="m${i}no">ไม่ล้างมือ</label>
+                        <input type="radio" class="btn-check" name="m${i}" id="m${i}gl" value="Glove"><label class="btn btn-outline-secondary btn-sm px-2" for="m${i}gl">สวมถุงมือ</label>
                     </div>
                 </div>
             </div>`;
@@ -254,7 +254,7 @@
         const ctxBar = document.getElementById('momentChart').getContext('2d');
         momentChart = new Chart(ctxBar, {
             type: 'bar',
-            data: { labels: ["M1", "M2", "M3", "M4", "M5"], datasets: [{ label: 'Compliance (%)', data: [0,0,0,0,0], backgroundColor: '#11998e', borderRadius: 5 }] },
+            data: { labels: ["M1", "M2", "M3", "M4", "M5"], datasets: [{ label: 'HW+HR (%)', data: [0,0,0,0,0], backgroundColor: '#11998e', borderRadius: 5 }] },
             options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } }, plugins: { legend: { display: false } } }
         });
 
