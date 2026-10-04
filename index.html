@@ -1339,6 +1339,7 @@
                 </div>
             </div>`;
         });
+       setNowDateTime();
         initCharts();
         fetch(SCRIPT_URL).then(res => res.json()).then(data => { database = data; render(database); }).catch(err => render(database));
     };
