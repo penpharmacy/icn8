@@ -317,35 +317,67 @@
         </div>
 
         <div class="grid grid-cols-1 gap-6">
-          <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
-            <div class="pb-3 mb-4 border-b border-slate-100 flex justify-between items-center">
-              <h3 class="font-bold text-slate-800 text-sm md:text-base flex items-center space-x-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse"></span><span>เปรียบเทียบ ปฏิบัติ/ไม่ปฏิบัติ รายข้อ (%)</span>
-              </h3>
-              <span class="text-[10px] bg-slate-100 px-2.5 py-1 rounded-full font-bold text-slate-500">เกณฑ์ 15 ข้อ</span>
-            </div>
-            <div class="relative min-h-[450px] w-full flex items-center justify-center">
-              <canvas id="bc_comparisonChartCanvas"></canvas>
-              <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
-            <div class="pb-3 mb-4 border-b border-slate-100 flex justify-between items-center">
-              <h3 class="font-bold text-slate-800 text-sm md:text-base flex items-center space-x-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span><span>เปรียบเทียบอัตราการปฏิบัติตามหน่วยงาน (ค่าเฉลี่ย %)</span>
-              </h3>
-              <span class="text-[10px] bg-slate-100 px-2.5 py-1 rounded-full font-bold text-slate-500">Average Compliance Rate</span>
-            </div>
-            <div class="relative w-full" style="height:320px;">
-              <canvas id="bc_deptChartCanvas"></canvas>
-              <div id="bc_deptChartEmpty" class="absolute inset-0 bg-white flex flex-col items-center justify-center text-slate-400 hidden">
-                <i data-lucide="bar-chart-2" class="w-10 h-10 text-slate-300"></i><p class="text-xs font-semibold mt-2">ไม่พบข้อมูลตามตัวกรองช่วงเวลาดังกล่าว</p>
-              </div>
-            </div>
-            <div id="bc_deptSummary" class="mt-4 grid grid-cols-2 md:grid-cols-3 gap-2"></div>
-          </div>
-              <div id="bc_chart1EmptyState" class="absolute inset-0 bg-white flex flex-col items-center justify-center text-slate-400 space-y-2 hidden">
-                <i data-lucide="bar-chart-2" class="w-12 h-12 text-slate-300"></i><p class="text-xs font-semibold">ไม่พบข้อมูลประเมินตามตัวกรองช่วงเวลาดังกล่าว</p>
-              </div>
-            </div>
-          </div>
+         <!-- การ์ด 1: เปรียบเทียบรายข้อ (ภาพรวม) -->
+<div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+  <div class="pb-3 mb-4 border-b border-slate-100 flex justify-between items-center">
+    <h3 class="font-bold text-slate-800 text-sm md:text-base flex items-center space-x-2">
+      <span class="w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse"></span><span>เปรียบเทียบ ปฏิบัติ/ไม่ปฏิบัติ รายข้อ (%)</span>
+    </h3>
+    <span class="text-[10px] bg-slate-100 px-2.5 py-1 rounded-full font-bold text-slate-500">เกณฑ์ 15 ข้อ</span>
+  </div>
+  <div class="relative min-h-[450px] w-full flex items-center justify-center">
+    <canvas id="bc_comparisonChartCanvas"></canvas>
+    <div id="bc_chart1EmptyState" class="absolute inset-0 bg-white flex flex-col items-center justify-center text-slate-400 space-y-2 hidden">
+      <i data-lucide="bar-chart-2" class="w-12 h-12 text-slate-300"></i><p class="text-xs font-semibold">ไม่พบข้อมูลประเมินตามตัวกรองช่วงเวลาดังกล่าว</p>
+    </div>
+  </div>
+</div>
+
+<!-- การ์ด 2: เปรียบเทียบตามหน่วยงาน (ภาพรวม) -->
+<div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+  <div class="pb-3 mb-4 border-b border-slate-100 flex flex-wrap gap-2 justify-between items-center">
+    <h3 class="font-bold text-slate-800 text-sm md:text-base flex items-center space-x-2">
+      <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span><span>เปรียบเทียบอัตราการปฏิบัติตามหน่วยงาน (%)</span>
+    </h3>
+    <span class="text-[10px] bg-slate-100 px-2.5 py-1 rounded-full font-bold text-slate-500">คิดจากข้อที่บันทึกจริง</span>
+  </div>
+  <div class="relative w-full" style="height:340px;">
+    <canvas id="bc_deptChartCanvas"></canvas>
+    <div id="bc_deptChartEmpty" class="absolute inset-0 bg-white flex flex-col items-center justify-center text-slate-400 hidden">
+      <i data-lucide="bar-chart-2" class="w-10 h-10 text-slate-300"></i><p class="text-xs font-semibold mt-2">ไม่พบข้อมูลตามตัวกรองช่วงเวลาดังกล่าว</p>
+    </div>
+  </div>
+  <div id="bc_deptSummary" class="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2"></div>
+</div>
+
+<!-- การ์ด 3: เปรียบเทียบหน่วยงาน x รายข้อ -->
+<div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
+  <div class="pb-3 mb-4 border-b border-slate-100 flex flex-wrap gap-3 justify-between items-center">
+    <h3 class="font-bold text-slate-800 text-sm md:text-base flex items-center space-x-2">
+      <span class="w-2.5 h-2.5 rounded-full bg-sky-500"></span><span>เปรียบเทียบแต่ละหน่วยงาน รายข้อ (%)</span>
+    </h3>
+    <div class="flex gap-1 bg-slate-100 p-1 rounded-xl">
+      <button id="bc_deptItemBtn-yes" onclick="bc_setDeptItemMetric('yes')" class="px-4 py-1.5 rounded-lg text-xs font-bold transition-all bg-blue-600 text-white shadow-sm">% ปฏิบัติ</button>
+      <button id="bc_deptItemBtn-no" onclick="bc_setDeptItemMetric('no')" class="px-4 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-600 hover:text-slate-800">% ไม่ปฏิบัติ</button>
+    </div>
+  </div>
+  <div class="relative w-full">
+    <div class="overflow-x-auto">
+      <div class="relative" style="min-width:900px;height:420px;">
+        <canvas id="bc_deptItemChartCanvas"></canvas>
+      </div>
+    </div>
+    <div id="bc_deptItemEmpty" class="absolute inset-0 bg-white flex flex-col items-center justify-center text-slate-400 hidden">
+      <i data-lucide="bar-chart-2" class="w-10 h-10 text-slate-300"></i><p class="text-xs font-semibold mt-2">ไม่พบข้อมูลตามตัวกรองช่วงเวลาดังกล่าว</p>
+    </div>
+  </div>
+  <div class="mt-6 overflow-x-auto rounded-xl border border-slate-100">
+    <table class="w-full text-sm border-collapse min-w-[900px]">
+      <thead id="bc_deptItemTableHead"></thead>
+      <tbody id="bc_deptItemTableBody" class="divide-y divide-slate-100"></tbody>
+    </table>
+  </div>
+</div>
           <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-200">
             <div class="pb-3 mb-4 border-b border-slate-100 flex justify-between items-center">
               <h3 class="font-bold text-slate-800 text-sm md:text-base flex items-center space-x-2">
