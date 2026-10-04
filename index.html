@@ -1112,6 +1112,31 @@
         document.getElementById('nav-bc').innerHTML = '<span class="w-2 h-2 rounded-full bg-slate-500"></span><span>Blood Culture</span>';
         document.getElementById('nav-mdr').innerHTML = '<span class="w-2 h-2 rounded-full bg-slate-500"></span><span>MDR Checklist</span>';
         document.getElementById('nav-cauti').innerHTML = '<span class="w-2 h-2 rounded-full bg-pink-300"></span><span>CAUTI Care Bundle</span>';
+         // ===== แทป 4-5: ล้างมือ =====
+      const hhIds = ['hhform', 'hhreport'];
+      const hhLabels = { bc:'Blood Culture', mdr:'MDR Checklist', cauti:'CAUTI Care Bundle', hhform:'ล้างมือ: บันทึก', hhreport:'ล้างมือ: รายงาน' };
+      const baseCls = "px-4 py-1.5 rounded-full font-semibold text-xs sm:text-sm transition-all flex items-center space-x-1.5 shrink-0 ";
+      hhIds.forEach(id => document.getElementById('app-' + id).classList.add('hidden'));
+      if (hhIds.includes(appId)) {
+        document.getElementById('app-' + appId).classList.remove('hidden');
+        Object.keys(hhLabels).forEach(id => {
+          const el = document.getElementById('nav-' + id);
+          const active = id === appId;
+          el.className = baseCls + (active ? "bg-emerald-600 text-white font-bold shadow" : "bg-slate-700 text-slate-300 hover:bg-slate-600");
+          el.innerHTML = `<span class="w-2 h-2 rounded-full ${active ? 'bg-emerald-300' : 'bg-slate-500'}"></span><span>${hhLabels[id]}</span>`;
+        });
+        const frame = document.getElementById('frame-' + appId);
+        if (!frame.dataset.loaded) {   // โหลดครั้งแรกครั้งเดียว
+          frame.srcdoc = '<!DOCTYPE html>' + document.getElementById('src-' + appId).innerHTML;
+          frame.dataset.loaded = '1';
+        }
+      } else {
+        hhIds.forEach(id => {
+          const el = document.getElementById('nav-' + id);
+          el.className = baseCls + "bg-slate-700 text-slate-300 hover:bg-slate-600";
+          el.innerHTML = `<span class="w-2 h-2 rounded-full bg-slate-500"></span><span>${hhLabels[id]}</span>`;
+        });
+      }
       }
     }
 
