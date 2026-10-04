@@ -1569,18 +1569,17 @@
         <div class="row align-items-end g-3 justify-content-center">
             <div class="col-md-3">
                 <label class="form-label fw-bold small text-muted"><i class="fas fa-filter"></i> รูปแบบการแสดงรายงาน</label>
-                <select class="form-select border-success-subtle" id="filterType" onchange="toggleFilterInputs()">
-                    <option value="all">1. ข้อมูลทั้งหมด</option>
-                    <option value="month">2. รายเดือน</option>
-                    <option value="year">3. รายปี</option>
-                    <option value="range">4. กำหนดช่วงวันที่</option>
-                </select>
+                <select class="form-select border-success-subtle" id="filterType" onchange="onFilterTypeChange()">
+    <option value="all">1. ข้อมูลทั้งหมด</option>
+    <option value="month">2. รายเดือน</option>
+    <option value="year">3. รายปี</option>
+    <option value="range">4. กำหนดช่วงวันที่</option>
+</select>
             </div>
-            <div id="monthFilterGroup" class="col-md-2" style="display:none;"><label class="small text-muted">เลือกเดือน</label><input type="month" id="filterMonth" class="form-control"></div>
-            <div id="yearFilterGroup" class="col-md-2" style="display:none;"><label class="small text-muted">ระบุปี (ค.ศ.)</label><input type="number" id="filterYear" class="form-control" placeholder="2026"></div>
-            <div id="rangeFilterGroupStart" class="col-md-2" style="display:none;"><label class="small text-muted">จากวันที่</label><input type="date" id="filterStart" class="form-control"></div>
-            <div id="rangeFilterGroupEnd" class="col-md-2" style="display:none;"><label class="small text-muted">ถึงวันที่</label><input type="date" id="filterEnd" class="form-control"></div>
-            <div class="col-md-2">
+           <div id="monthFilterGroup" class="col-md-2" style="display:none;"><label class="small text-muted">เลือกเดือน</label><input type="month" id="filterMonth" class="form-control" onchange="updateReports()"></div>
+<div id="yearFilterGroup" class="col-md-2" style="display:none;"><label class="small text-muted">ระบุปี (ค.ศ.)</label><input type="number" id="filterYear" class="form-control" placeholder="2026" oninput="debouncedYearUpdate()"></div>
+<div id="rangeFilterGroupStart" class="col-md-2" style="display:none;"><label class="small text-muted">จากวันที่</label><input type="date" id="filterStart" class="form-control" onchange="updateReports()"></div>
+<div id="rangeFilterGroupEnd" class="col-md-2" style="display:none;"><label class="small text-muted">ถึงวันที่</label><input type="date" id="filterEnd" class="form-control" onchange="updateReports()"></div>
                 <button class="btn btn-success w-100 fw-bold py-2 shadow-sm" onclick="updateReports()"><i class="fas fa-sync-alt"></i> อัปเดตข้อมูล</button>
             </div>
             <div class="col-md-2">
