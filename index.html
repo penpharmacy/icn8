@@ -3516,7 +3516,10 @@
       document.getElementById('cauti_filterStartVal').value = today; 
       document.getElementById('cauti_filterEndVal').value = today;
       if (cauti_db.apiUrl) document.getElementById('cauti_apiEndpointUrl').value = cauti_db.apiUrl;
-      if(cauti_db.apiUrl) cauti_fetchDataFromSheet().then(() => { cauti_renderHistory(); cauti_renderReports(); });
+     cauti_autoRefresh(true);
+      setInterval(() => cauti_autoRefresh(false), CAUTI_AUTO_REFRESH_MS);
+      document.addEventListener('visibilitychange', () => { if (!document.hidden) cauti_autoRefresh(false); });
+      window.addEventListener('focus', () => cauti_autoRefresh(false));
       cauti_updateUnsyncedBadge(); cauti_updateStatusBadge(); cauti_renderHistory(); cauti_renderReports();
     };
 
