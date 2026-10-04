@@ -3080,45 +3080,103 @@
       else ring.className = "w-10 h-10 rounded-full border-2 border-slate-300 flex items-center justify-center font-bold text-sm";
     }
 
-    async function cauti_fetchDataFromSheet() {
-      if (!cauti_db.apiUrl) return false;
-      try {
-        const response = await fetch(cauti_db.apiUrl + '?action=fetch', { method: 'GET' });
-        const raw = await response.json();
-        if (!Array.isArray(raw) || raw.length < 2) return false;
-        const sheetRecords = [];
-        for (let i = 1; i < raw.length; i++) {
-          const row = raw[i];
-          if (!row[1]) continue; 
-          let dateVal = String(row[1]).slice(0, 10);
-          if (dateVal.length > 10 || isNaN(Date.parse(dateVal))) {
-            const d = new Date(row[1]); if (!isNaN(d)) dateVal = d.toISOString().slice(0, 10);
-          }
-          let rate = parseFloat(row[10]) || 0;
-          if (rate > 0 && rate <= 1) rate = Number((rate * 100).toFixed(2)); else rate = Number(rate.toFixed(2));
-          const getItem = (val) => { const s = String(val || '').trim(); return (s === 'ปฏิบัติ' || s === 'ไม่ปฏิบัติ') ? s : null; };
-          const itemsParsed = {};
-          for(let j=1; j<=cauti_TOTAL_ITEMS; j++) itemsParsed[j] = getItem(row[j+1]);
-          sheetRecords.push({ id: `SHEET_${i}_${dateVal}`, date: dateVal, timestamp: String(row[0]), items: itemsParsed, complianceRate: rate, remarks: String(row[11] || ''), synced: true });
-        }
-        if (sheetRecords.length === 0) return false;
-        const localUnsynced = cauti_db.records.filter(r => !r.synced);
-        cauti_db.records = [...sheetRecords, ...localUnsynced];
-        localStorage.setItem('cauti_records', JSON.stringify(cauti_db.records));
-        return true;
-      } catch (err) { console.error('Fetch Error:', err); return false; }
+       let cauti_lastHash = '';
+    let cauti_lastSuccess = null;
+    let cauti_isFetching = false;
+    const CAUTI_AUTO_REFRESH_MS = 30000; // ดึงใหม่ทุก 30 วินาที (ปรับได้)
+
+    // แปลงวันที่จากชีตเป็น YYYY-MM-DD ตามเวลาท้องถิ่น
+    function cauti_normalizeDate(v) {
+      const s = String(v || '').trim();
+      if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+      const d = new Date(v);
+      if (isNaN(d)) return s.slice(0, 10);
+      const p = n => String(n).padStart(2, '0');
+      return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
     }
 
+    async function cauti_fetchDataFromSheet() {
+      // ลอง URL ที่ตั้งไว้ก่อน ถ้าไม่ได้ให้ลอง URL เริ่มต้น
+      const urls = [...new Set([cauti_db.apiUrl, cauti_GLOBAL_DEFAULT_API_URL].filter(Boolean))];
+      for (const base of urls) {
+        try {
+          const sep = base.includes('?') ? '&' : '?';
+          const response = await fetch(base + sep + 'action=fetch&_=' + Date.now());
+          const raw = await response.json();
+          if (!Array.isArray(raw)) continue;
+
+          const getItem = (val) => { const s = String(val || '').trim(); return (s === 'ปฏิบัติ' || s === 'ไม่ปฏิบัติ') ? s : null; };
+          const sheetRecords = [];
+          for (let i = 1; i < raw.length; i++) {
+            const row = raw[i];
+            if (!row || !row[1]) continue;
+            const dateVal = cauti_normalizeDate(row[1]);
+            let rate = parseFloat(row[10]) || 0;
+            if (rate > 0 && rate <= 1) rate = Number((rate * 100).toFixed(2)); else rate = Number(rate.toFixed(2));
+            const itemsParsed = {};
+            for (let j = 1; j <= cauti_TOTAL_ITEMS; j++) itemsParsed[j] = getItem(row[j + 1]);
+            sheetRecords.push({ id: `SHEET_${i}_${dateVal}`, date: dateVal, timestamp: String(row[0]), items: itemsParsed, complianceRate: rate, remarks: String(row[11] || ''), synced: true });
+          }
+
+          const hash = JSON.stringify(sheetRecords);
+          const changed = hash !== cauti_lastHash;
+          cauti_lastHash = hash;
+
+          const localUnsynced = cauti_db.records.filter(r => !r.synced);
+          cauti_db.records = [...sheetRecords, ...localUnsynced];
+          localStorage.setItem('cauti_records', JSON.stringify(cauti_db.records));
+          cauti_lastSuccess = new Date();
+          return { ok: true, changed };
+        } catch (err) {
+          console.error('CAUTI fetch error:', err);
+        }
+      }
+      return { ok: false, changed: false };
+    }
+
+    function cauti_updateLastUpdatedLabel(ok) {
+      const el = document.getElementById('cauti_dashboardLastUpdated');
+      if (!el) return;
+      const fmt = d => d.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      if (ok && cauti_lastSuccess) {
+        el.innerHTML = `<span class="text-emerald-600 font-semibold">✓ อัปเดตอัตโนมัติ ล่าสุด: ${fmt(cauti_lastSuccess)}</span>`;
+      } else if (cauti_lastSuccess) {
+        el.innerHTML = `<span class="text-slate-500 font-semibold">✓ อัปเดตล่าสุด: ${fmt(cauti_lastSuccess)} (กำลังลองใหม่อัตโนมัติ)</span>`;
+      } else {
+        el.innerHTML = `<span class="text-slate-500 font-semibold">กำลังเชื่อมต่อ Google Sheets...</span>`;
+      }
+    }
+
+    function cauti_isReportsVisible() {
+      return !document.getElementById('app-cauti').classList.contains('hidden') &&
+             !document.getElementById('cauti_tab-reports-content').classList.contains('hidden');
+    }
+
+    // ดึงข้อมูลอัตโนมัติ อัปเดตหน้าจอเมื่อข้อมูลเปลี่ยนจริงเท่านั้น
+    async function cauti_autoRefresh(force) {
+      if (cauti_isFetching) return;
+      cauti_isFetching = true;
+      try {
+        const r = await cauti_fetchDataFromSheet();
+        if (r.ok && (r.changed || force)) {
+          cauti_renderHistory();
+          cauti_updateUnsyncedBadge();
+          if (cauti_isReportsVisible()) cauti_renderReports();
+        }
+        cauti_updateLastUpdatedLabel(r.ok);
+      } finally {
+        cauti_isFetching = false;
+      }
+    }
+
+    // ปุ่ม "รีเฟรชจาก Sheets" และตอนเปิดแท็บสถิติ
     async function cauti_fetchAndRenderReports() {
       const refreshIcon = document.getElementById('cauti_refreshIcon');
       if (refreshIcon) refreshIcon.classList.add('animate-spin');
-      const success = await cauti_fetchDataFromSheet();
+      const r = await cauti_fetchDataFromSheet();
       if (refreshIcon) refreshIcon.classList.remove('animate-spin');
       cauti_renderReports(); cauti_renderHistory(); cauti_updateUnsyncedBadge();
-      const now = new Date(); const timeStr = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
-      const lastUpdatedEl = document.getElementById('cauti_dashboardLastUpdated');
-      if (success) { if (lastUpdatedEl) lastUpdatedEl.innerHTML = `<span class="text-emerald-600 font-semibold">✓ อัปเดตล่าสุด: ${timeStr}</span>`; }
-      else { if (lastUpdatedEl) lastUpdatedEl.innerHTML = `<span class="text-amber-600 font-semibold">⚠ ทำงานแบบออฟไลน์</span>`; }
+      cauti_updateLastUpdatedLabel(r.ok);
     }
 
     function cauti_switchTab(tabName) {
