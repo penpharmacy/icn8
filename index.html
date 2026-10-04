@@ -2798,7 +2798,7 @@ function bc_renderDeptItemChart(records) {
   body.innerHTML = rows.map((d, k) => `
     <tr class="hover:bg-slate-50/60">
       <td class="px-3 py-2 font-bold text-slate-700 sticky left-0 bg-white z-10 whitespace-nowrap">
-        <span class="inline-block w-2.5 h-2.5 rounded-full mr-1.5" style="background:${bc_deptColor(d.name)]}"></span>${bc_esc(d.name)}
+        <span class="inline-block w-2.5 h-2.5 rounded-full mr-1.5" style="background:${bc_deptColor(d.name)}"></span>${bc_esc(d.name)}
         <span class="block text-[10px] font-normal text-slate-400 pl-4">${d.n} ครั้ง</span>
       </td>
       ${itemNums.map(i => cell(d.items[i])).join('')}
