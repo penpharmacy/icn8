@@ -2751,7 +2751,7 @@ function bc_renderDeptItemChart(records) {
       datasets: rows.map((d, k) => ({
         label: d.name,
         data: itemNums.map(i => Number(pct(d.items[i]).toFixed(2))),
-        backgroundColor: bc_deptColor(d.name)],
+        backgroundColor: bc_deptColor(d.name),
         borderRadius: 3
       }))
     },
