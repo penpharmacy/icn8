@@ -1343,7 +1343,7 @@
         fetch(SCRIPT_URL).then(res => res.json()).then(data => { database = data; render(database); }).catch(err => render(database));
     };
 
-    function initCharts() {
+       function initCharts() {
         const ctxBar = document.getElementById('momentChart').getContext('2d');
         momentChart = new Chart(ctxBar, {
             type: 'bar',
@@ -1359,11 +1359,19 @@
         });
     }
 
+    // ตั้งค่าวันที่และเวลาเป็นปัจจุบัน (ผู้ใช้ยังแก้ไขเองได้)
+    function setNowDateTime() {
+        const now = new Date();
+        const pad = n => String(n).padStart(2, '0');
+        document.getElementById('obsDate').value = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+        document.getElementById('obsTime').value = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    }
+
     function toggleOther(id, show) { document.getElementById(id).style.display = show ? "block" : "none"; }
     function clearForm() { 
         document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false); 
         document.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false); 
-        document.getElementById('obsDate').value = ""; document.getElementById('obsTime').value = "";
+        setNowDateTime();
         toggleOther('deptOther', false);
         toggleOther('roleOther', false);
     }
