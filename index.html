@@ -2552,6 +2552,68 @@
       return recs;
     }
 
+        let bc_deptChartInstance = null;
+
+    function bc_renderDeptChart(records) {
+      const canvas = document.getElementById('bc_deptChartCanvas');
+      const emptyEl = document.getElementById('bc_deptChartEmpty');
+      const sumEl = document.getElementById('bc_deptSummary');
+      if (!canvas) return;
+      if (bc_deptChartInstance) { bc_deptChartInstance.destroy(); bc_deptChartInstance = null; }
+
+      // รวมกลุ่มตามหน่วยงาน
+      const g = {};
+      records.forEach(r => {
+        const name = (r.department || '').trim() || 'ไม่ระบุ';
+        if (!g[name]) g[name] = { sum: 0, n: 0 };
+        g[name].sum += parseFloat(r.complianceRate) || 0;
+        g[name].n += 1;
+      });
+      const rows = Object.keys(g).map(k => ({ name: k, avg: g[k].sum / g[k].n, n: g[k].n }))
+                         .sort((a, b) => b.avg - a.avg);
+
+      if (rows.length === 0) { emptyEl.classList.remove('hidden'); sumEl.innerHTML = ''; return; }
+      emptyEl.classList.add('hidden');
+
+      const colorOf = v => v >= 80 ? '#2563EB' : (v >= 60 ? '#38BDF8' : '#FACC15');
+
+      bc_deptChartInstance = new Chart(canvas.getContext('2d'), {
+        type: 'bar',
+        plugins: [ChartDataLabels],
+        data: {
+          labels: rows.map(r => r.name),
+          datasets: [{
+            label: 'อัตราการปฏิบัติเฉลี่ย (%)',
+            data: rows.map(r => Number(r.avg.toFixed(2))),
+            backgroundColor: rows.map(r => colorOf(r.avg)),
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          scales: {
+            y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%', font: { family: 'Prompt', size: 10 } } },
+            x: { ticks: { font: { family: 'Prompt', size: 11 } } }
+          },
+          plugins: {
+            legend: { display: false },
+            datalabels: { anchor: 'end', align: 'end', color: '#1e293b', font: { family: 'Prompt', size: 11, weight: 'bold' }, formatter: v => v.toFixed(2) + '%' },
+            tooltip: { callbacks: { label: c => ` เฉลี่ย ${c.raw.toFixed(2)}% (ประเมิน ${rows[c.dataIndex].n} ครั้ง)` } }
+          },
+          layout: { padding: { top: 20 } }
+        }
+      });
+
+      // สรุปเป็นการ์ดเล็กใต้กราฟ
+      sumEl.innerHTML = rows.map(r => `
+        <div class="flex items-center justify-between bg-slate-50 border border-slate-100 rounded-xl px-3 py-2">
+          <span class="text-sm font-semibold text-slate-700">${r.name}</span>
+          <span class="text-right leading-tight">
+            <span class="block text-sm font-bold text-blue-600">${r.avg.toFixed(2)}%</span>
+            <span class="block text-[10px] text-slate-400">${r.n} ครั้ง</span>
+          </span>
+        </div>`).join('');
+    }
     function bc_renderReports() {
       const records = bc_getFilteredRecords(); const total = records.length;
       document.getElementById('bc_repTotalEvaluations').innerText = total;
