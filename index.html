@@ -2400,7 +2400,9 @@
 
     function bc_resetCurrentForm() {
       document.getElementById('bc_evalRemarks').value = '';
-      ['bc_department','bc_patientName','bc_practitioner','bc_evaluator','bc_evalTime'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+     ['bc_patientName','bc_practitioner','bc_evaluator','bc_evalTime'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+      document.querySelectorAll('input[name="bc_deptRadio"]').forEach(r => r.checked = false);
+      bc_onDeptChange();
       bc_currentRecord.items = {...bc_defaultItems}; bc_currentRecord.complianceRate = 0;
       document.querySelectorAll('#app-bc .card-bundle-item').forEach(card => {
         card.querySelector('.btn-check-yes').className = "btn-check-yes flex-1 md:w-24 py-2 rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 transition-all text-xs font-semibold flex items-center justify-center space-x-1";
