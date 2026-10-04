@@ -131,7 +131,14 @@
             <form id="bc_metaForm" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl">
               <div>
                 <label class="block text-sm font-semibold text-slate-600 mb-1.5">หน่วยงาน</label>
-                <input type="text" id="bc_department" placeholder="ระบุหน่วยงาน" class="w-full px-4 py-2.5 border border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-slate-700 font-medium bg-white/80">
+                <div class="flex flex-wrap gap-2">
+                  <label class="cursor-pointer"><input type="radio" name="bc_deptRadio" value="OPD" class="peer sr-only" onchange="bc_onDeptChange()"><span class="inline-block px-4 py-2 rounded-xl border border-blue-200 bg-white/80 text-sm font-semibold text-slate-600 transition-all peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600">OPD</span></label>
+                  <label class="cursor-pointer"><input type="radio" name="bc_deptRadio" value="IPD" class="peer sr-only" onchange="bc_onDeptChange()"><span class="inline-block px-4 py-2 rounded-xl border border-blue-200 bg-white/80 text-sm font-semibold text-slate-600 transition-all peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600">IPD</span></label>
+                  <label class="cursor-pointer"><input type="radio" name="bc_deptRadio" value="LR" class="peer sr-only" onchange="bc_onDeptChange()"><span class="inline-block px-4 py-2 rounded-xl border border-blue-200 bg-white/80 text-sm font-semibold text-slate-600 transition-all peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600">LR</span></label>
+                  <label class="cursor-pointer"><input type="radio" name="bc_deptRadio" value="ER" class="peer sr-only" onchange="bc_onDeptChange()"><span class="inline-block px-4 py-2 rounded-xl border border-blue-200 bg-white/80 text-sm font-semibold text-slate-600 transition-all peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600">ER</span></label>
+                  <label class="cursor-pointer"><input type="radio" name="bc_deptRadio" value="อื่นๆ" class="peer sr-only" onchange="bc_onDeptChange()"><span class="inline-block px-4 py-2 rounded-xl border border-blue-200 bg-white/80 text-sm font-semibold text-slate-600 transition-all peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600">อื่นๆ</span></label>
+                </div>
+                <input type="text" id="bc_departmentOther" placeholder="ระบุชื่อหน่วยงาน..." class="hidden mt-2 w-full px-4 py-2.5 border border-blue-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-slate-700 font-medium bg-white/80">
               </div>
               <div>
                 <label class="block text-sm font-semibold text-slate-600 mb-1.5">วันที่</label>
