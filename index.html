@@ -2771,6 +2771,7 @@ function bc_renderDeptItemChart(records) {
       }
       document.getElementById('bc_chart1EmptyState').classList.add('hidden');
        bc_renderDeptChart(records);
+      bc_renderDeptItemChart(records);
       let fullC = 0; records.forEach(r => { if(r.complianceRate === 100) fullC++; });
       document.getElementById('bc_repFullComplianceCount').innerText = fullC; document.getElementById('bc_repFullCompliancePct').innerText = `${((fullC/total)*100).toFixed(2)}% (${fullC}/${total}) ของทั้งหมด`;
       const stats = {}; for(let i=1; i<=bc_TOTAL_ITEMS; i++) stats[i] = { yes:0, no:0, text: bc_checkListData[i] };
