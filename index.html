@@ -2680,7 +2680,16 @@ function bc_renderDeptChart(records) {
         x: { ticks: { font: { family: 'Prompt', size: 11 } } }
       },
       plugins: {
-        legend: { position: 'bottom', labels: { font: { family: 'Prompt', size: 12 } } },
+       legend: {
+  position: 'bottom',
+  labels: {
+    font: { family: 'Prompt', size: 12 },
+    generateLabels: () => [
+      { text: 'ปฏิบัติ (สีเข้ม)', fillStyle: '#475569', strokeStyle: '#475569', datasetIndex: 0 },
+      { text: 'ไม่ปฏิบัติ (สีอ่อน)', fillStyle: '#CBD5E1', strokeStyle: '#475569', lineWidth: 1.5, datasetIndex: 1 }
+    ]
+  }
+},
         datalabels: { anchor: 'end', align: 'end', color: '#1e293b', font: { family: 'Prompt', size: 10, weight: 'bold' }, formatter: v => v.toFixed(2) + '%' },
         tooltip: {
           callbacks: {
