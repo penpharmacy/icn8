@@ -2780,7 +2780,7 @@ function bc_renderDeptItemChart(records) {
       records.forEach(r => { for(let i=1; i<=bc_TOTAL_ITEMS; i++) { if(r.items[i]==='ปฏิบัติ') stats[i].yes++; else if(r.items[i]==='ไม่ปฏิบัติ') stats[i].no++; } });
       let lowestRate = 101, lowestItems = []; let html = "", lbls=[], dYes=[], dNo=[], fYes=[], fNo=[]; let ncDataArr = []; const tempDiv = document.createElement("div");
       for(let i=1; i<=bc_TOTAL_ITEMS; i++) {
-        const totalEval = stats[i].yes + stats[i].no; const pYes = totalEval > 0 ? Number(((stats[i].yes / totalEval) * 100).toFixed(2)) : 0; const pNo = totalEval > 0 ? Number((100 - pYes).toFixed(2)) : 0;
+        const totalEval = stats[i].yes + stats[i].no; const pYes = totalEval > 0 ? Number(((stats[i].yes / totalEval) * 100).toFixed(2)) : 0; const pNo = totalEval > 0 ? Number(((stats[i].no / totalEval) * 100).toFixed(2)) : 0;
         lbls.push(`ข้อ ${i}`); dYes.push(pYes); dNo.push(pNo); fYes.push(`${stats[i].yes}/${totalEval}`); fNo.push(`${stats[i].no}/${totalEval}`);
         tempDiv.innerHTML = stats[i].text; const cleanText = tempDiv.textContent || tempDiv.innerText || "";
         if(totalEval > 0) { if(pYes < lowestRate) { lowestRate = pYes; lowestItems = [{ item: i, text: cleanText }]; } else if(pYes === lowestRate) { lowestItems.push({ item: i, text: cleanText }); } }
