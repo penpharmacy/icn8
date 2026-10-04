@@ -1565,22 +1565,28 @@
 </div>
 
 <div class="container-fluid px-lg-5">
-    <div class="card p-4 no-print border-0 shadow-sm">
+  <div class="card p-4 no-print border-0 shadow-sm">
         <div class="row align-items-end g-3 justify-content-center">
             <div class="col-md-3">
                 <label class="form-label fw-bold small text-muted"><i class="fas fa-filter"></i> รูปแบบการแสดงรายงาน</label>
                 <select class="form-select border-success-subtle" id="filterType" onchange="onFilterTypeChange()">
-    <option value="all">1. ข้อมูลทั้งหมด</option>
-    <option value="month">2. รายเดือน</option>
-    <option value="year">3. รายปี</option>
-    <option value="range">4. กำหนดช่วงวันที่</option>
-</select>
+                    <option value="all">1. ข้อมูลทั้งหมด</option>
+                    <option value="month">2. รายเดือน</option>
+                    <option value="year">3. รายปี</option>
+                    <option value="range">4. กำหนดช่วงวันที่</option>
+                </select>
             </div>
-           <div id="monthFilterGroup" class="col-md-2" style="display:none;"><label class="small text-muted">เลือกเดือน</label><input type="month" id="filterMonth" class="form-control" onchange="updateReports()"></div>
-<div id="yearFilterGroup" class="col-md-2" style="display:none;"><label class="small text-muted">ระบุปี (ค.ศ.)</label><input type="number" id="filterYear" class="form-control" placeholder="2026" oninput="debouncedYearUpdate()"></div>
-<div id="rangeFilterGroupStart" class="col-md-2" style="display:none;"><label class="small text-muted">จากวันที่</label><input type="date" id="filterStart" class="form-control" onchange="updateReports()"></div>
-<div id="rangeFilterGroupEnd" class="col-md-2" style="display:none;"><label class="small text-muted">ถึงวันที่</label><input type="date" id="filterEnd" class="form-control" onchange="updateReports()"></div>
-                <button class="btn btn-success w-100 fw-bold py-2 shadow-sm" onclick="updateReports()"><i class="fas fa-sync-alt"></i> อัปเดตข้อมูล</button>
+            <div id="monthFilterGroup" class="col-md-2" style="display:none;"><label class="small text-muted">เลือกเดือน</label><input type="month" id="filterMonth" class="form-control" onchange="updateReports()"></div>
+            <div id="yearFilterGroup" class="col-md-2" style="display:none;"><label class="small text-muted">ระบุปี (ค.ศ.)</label><input type="number" id="filterYear" class="form-control" placeholder="2026" oninput="debouncedYearUpdate()"></div>
+            <div id="rangeFilterGroupStart" class="col-md-2" style="display:none;"><label class="small text-muted">จากวันที่</label><input type="date" id="filterStart" class="form-control" onchange="updateReports()"></div>
+            <div id="rangeFilterGroupEnd" class="col-md-2" style="display:none;"><label class="small text-muted">ถึงวันที่</label><input type="date" id="filterEnd" class="form-control" onchange="updateReports()"></div>
+
+            <!-- ป้ายสถานะอัตโนมัติ (แทนปุ่มอัปเดตข้อมูล) -->
+            <div class="col-md-2">
+                <div class="w-100 py-2 px-2 rounded border bg-light text-center small" style="line-height:1.25;">
+                    <span id="autoDot" class="d-inline-block rounded-circle me-1" style="width:9px;height:9px;background:#adb5bd;"></span>
+                    <span id="autoStatusText" class="fw-bold">กำลังโหลดข้อมูล...</span>
+                </div>
             </div>
             <div class="col-md-2">
                 <button class="btn btn-primary w-100 fw-bold py-2 shadow-sm" onclick="exportToExcel()"><i class="fas fa-file-excel"></i> Export Excel</button>
@@ -1588,11 +1594,11 @@
             <div class="col-md-2">
                 <button class="btn btn-danger w-100 fw-bold py-2 shadow-sm" onclick="window.print()"><i class="fas fa-file-pdf"></i> พิมพ์ PDF</button>
             </div>
-          <div class="col-md-2">
-    <a href="https://docs.google.com/spreadsheets/d/1b3iredqZaMBr2oHbwlBm91rynx-mMx76vlZpLiaE43c/edit?gid=0#gid=0" target="_blank" rel="noopener" class="btn btn-warning w-100 fw-bold py-2 shadow-sm">
-        <i class="fas fa-table"></i> ดูข้อมูล Google Sheet
-    </a>
-</div>
+            <div class="col-md-2">
+                <a href="https://docs.google.com/spreadsheets/d/1b3iredqZaMBr2oHbwlBm91rynx-mMx76vlZpLiaE43c/edit?gid=0#gid=0" target="_blank" rel="noopener" class="btn btn-warning w-100 fw-bold py-2 shadow-sm">
+                    <i class="fas fa-table"></i> ดูข้อมูล Google Sheet
+                </a>
+            </div>
         </div>
     </div>
 
