@@ -2584,28 +2584,47 @@
       return recs;
     }
 
-        let bc_deptChartInstance = null;
+   let bc_deptItemChartInstance = null;
+let bc_deptItemMetric = 'yes';
+const bc_DEPT_PALETTE = ['#2563EB', '#38BDF8', '#FACC15', '#10B981', '#A855F7', '#F97316', '#EC4899', '#64748B'];
 
-  function bc_renderDeptChart(records) {
+function bc_esc(s) {
+  return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+// รวมข้อมูลตามหน่วยงาน โดยนับจากค่าจริงที่บันทึก (ปฏิบัติ / ไม่ปฏิบัติ)
+function bc_aggregateByDept(records) {
+  const g = {};
+  records.forEach(r => {
+    const name = (r.department || '').trim() || 'ไม่ระบุ';
+    if (!g[name]) {
+      g[name] = { name, n: 0, yes: 0, no: 0, items: {} };
+      for (let i = 1; i <= bc_TOTAL_ITEMS; i++) g[name].items[i] = { yes: 0, no: 0 };
+    }
+    g[name].n++;
+    for (let i = 1; i <= bc_TOTAL_ITEMS; i++) {
+      const v = r.items[i];
+      if (v === 'ปฏิบัติ') { g[name].yes++; g[name].items[i].yes++; }
+      else if (v === 'ไม่ปฏิบัติ') { g[name].no++; g[name].items[i].no++; }
+    }
+  });
+  return Object.values(g).map(d => {
+    d.total = d.yes + d.no;
+    d.pYes = d.total > 0 ? (d.yes / d.total) * 100 : 0;
+    d.pNo = d.total > 0 ? (d.no / d.total) * 100 : 0;
+    return d;
+  }).sort((a, b) => b.pYes - a.pYes);
+}
+
+// กราฟที่ 1: ภาพรวมแต่ละหน่วยงาน (Grouped Bar)
+function bc_renderDeptChart(records) {
   const canvas = document.getElementById('bc_deptChartCanvas');
   const emptyEl = document.getElementById('bc_deptChartEmpty');
   const sumEl = document.getElementById('bc_deptSummary');
   if (!canvas) return;
   if (bc_deptChartInstance) { bc_deptChartInstance.destroy(); bc_deptChartInstance = null; }
 
-  // รวมกลุ่มตามหน่วยงาน
-  const g = {};
-  records.forEach(r => {
-    const name = (r.department || '').trim() || 'ไม่ระบุ';
-    if (!g[name]) g[name] = { sum: 0, n: 0 };
-    g[name].sum += parseFloat(r.complianceRate) || 0;
-    g[name].n += 1;
-  });
-  const rows = Object.keys(g).map(k => {
-    const avg = g[k].sum / g[k].n;
-    return { name: k, avg: avg, miss: 100 - avg, n: g[k].n };
-  }).sort((a, b) => b.avg - a.avg);
-
+  const rows = bc_aggregateByDept(records);
   if (rows.length === 0) { emptyEl.classList.remove('hidden'); sumEl.innerHTML = ''; return; }
   emptyEl.classList.add('hidden');
 
@@ -2615,18 +2634,8 @@
     data: {
       labels: rows.map(r => r.name),
       datasets: [
-        {
-          label: 'ปฏิบัติ (%)',
-          data: rows.map(r => Number(r.avg.toFixed(2))),
-          backgroundColor: '#2563EB',
-          borderRadius: 4
-        },
-        {
-          label: 'ไม่ปฏิบัติ (%)',
-          data: rows.map(r => Number(r.miss.toFixed(2))),
-          backgroundColor: '#FACC15',
-          borderRadius: 4
-        }
+        { label: 'ปฏิบัติ (%)', data: rows.map(r => Number(r.pYes.toFixed(2))), counts: rows.map(r => r.yes), backgroundColor: '#2563EB', borderRadius: 4 },
+        { label: 'ไม่ปฏิบัติ (%)', data: rows.map(r => Number(r.pNo.toFixed(2))), counts: rows.map(r => r.no), backgroundColor: '#FACC15', borderRadius: 4 }
       ]
     },
     options: {
@@ -2637,14 +2646,11 @@
       },
       plugins: {
         legend: { position: 'bottom', labels: { font: { family: 'Prompt', size: 12 } } },
-        datalabels: {
-          anchor: 'end', align: 'end', color: '#1e293b',
-          font: { family: 'Prompt', size: 10, weight: 'bold' },
-          formatter: v => v.toFixed(2) + '%'
-        },
+        datalabels: { anchor: 'end', align: 'end', color: '#1e293b', font: { family: 'Prompt', size: 10, weight: 'bold' }, formatter: v => v.toFixed(2) + '%' },
         tooltip: {
           callbacks: {
-            label: c => ` ${c.dataset.label}: ${Number(c.raw).toFixed(2)}% (ประเมิน ${rows[c.dataIndex].n} ครั้ง)`
+            label: c => ` ${c.dataset.label}: ${Number(c.raw).toFixed(2)}% (${c.dataset.counts[c.dataIndex]}/${rows[c.dataIndex].total} ข้อ)`,
+            afterBody: items => `ประเมิน ${rows[items[0].dataIndex].n} ครั้ง`
           }
         }
       },
@@ -2652,15 +2658,106 @@
     }
   });
 
-  // การ์ดสรุปใต้กราฟ
   sumEl.innerHTML = rows.map(r => `
-    <div class="flex items-center justify-between bg-slate-50 border border-slate-100 rounded-xl px-3 py-2">
-      <span class="text-sm font-semibold text-slate-700">${r.name}</span>
-      <span class="text-right leading-tight">
-        <span class="block text-sm font-bold text-blue-600">${r.avg.toFixed(2)}%</span>
-        <span class="block text-[10px] text-slate-400">${r.n} ครั้ง</span>
-      </span>
+    <div class="bg-slate-50 border border-slate-100 rounded-xl px-3 py-2.5">
+      <div class="flex items-center justify-between">
+        <span class="text-sm font-bold text-slate-700">${bc_esc(r.name)}</span>
+        <span class="text-[10px] text-slate-400">${r.n} ครั้ง</span>
+      </div>
+      <div class="flex justify-between text-xs mt-1.5">
+        <span class="font-bold text-blue-600">ปฏิบัติ ${r.pYes.toFixed(2)}% <span class="font-normal text-slate-400">(${r.yes}/${r.total})</span></span>
+        <span class="font-bold text-yellow-600">ไม่ปฏิบัติ ${r.pNo.toFixed(2)}% <span class="font-normal text-slate-400">(${r.no}/${r.total})</span></span>
+      </div>
     </div>`).join('');
+}
+
+// สลับดู % ปฏิบัติ / % ไม่ปฏิบัติ
+function bc_setDeptItemMetric(m) {
+  bc_deptItemMetric = m;
+  const on = "px-4 py-1.5 rounded-lg text-xs font-bold transition-all bg-blue-600 text-white shadow-sm";
+  const off = "px-4 py-1.5 rounded-lg text-xs font-semibold transition-all text-slate-600 hover:text-slate-800";
+  document.getElementById('bc_deptItemBtn-yes').className = m === 'yes' ? on : off;
+  document.getElementById('bc_deptItemBtn-no').className = m === 'no' ? on.replace('bg-blue-600', 'bg-yellow-500') : off;
+  bc_renderDeptItemChart(bc_getFilteredRecords());
+}
+
+// กราฟที่ 2: หน่วยงาน x รายข้อ + ตาราง
+function bc_renderDeptItemChart(records) {
+  const canvas = document.getElementById('bc_deptItemChartCanvas');
+  const emptyEl = document.getElementById('bc_deptItemEmpty');
+  const head = document.getElementById('bc_deptItemTableHead');
+  const body = document.getElementById('bc_deptItemTableBody');
+  if (!canvas) return;
+  if (bc_deptItemChartInstance) { bc_deptItemChartInstance.destroy(); bc_deptItemChartInstance = null; }
+
+  const rows = bc_aggregateByDept(records);
+  if (rows.length === 0) { emptyEl.classList.remove('hidden'); head.innerHTML = ''; body.innerHTML = ''; return; }
+  emptyEl.classList.add('hidden');
+
+  const isYes = bc_deptItemMetric === 'yes';
+  const itemNums = Array.from({ length: bc_TOTAL_ITEMS }, (_, k) => k + 1);
+  const pct = (c) => { const t = c.yes + c.no; return t > 0 ? ((isYes ? c.yes : c.no) / t) * 100 : 0; };
+
+  bc_deptItemChartInstance = new Chart(canvas.getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: itemNums.map(i => `ข้อ ${i}`),
+      datasets: rows.map((d, k) => ({
+        label: d.name,
+        data: itemNums.map(i => Number(pct(d.items[i]).toFixed(2))),
+        backgroundColor: bc_DEPT_PALETTE[k % bc_DEPT_PALETTE.length],
+        borderRadius: 3
+      }))
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      scales: {
+        y: { beginAtZero: true, max: 100, ticks: { stepSize: 20, callback: v => v + '%', font: { family: 'Prompt', size: 10 } } },
+        x: { ticks: { font: { family: 'Prompt', size: 10 } } }
+      },
+      plugins: {
+        legend: { position: 'bottom', labels: { font: { family: 'Prompt', size: 12 } } },
+        tooltip: {
+          callbacks: {
+            title: items => { const n = items[0].dataIndex + 1; const t = bc_checkListData[n]; return `ข้อ ${n}. ${t.length > 50 ? t.slice(0, 50) + '...' : t}`; },
+            label: c => {
+              const cnt = rows[c.datasetIndex].items[c.dataIndex + 1];
+              const t = cnt.yes + cnt.no;
+              return ` ${c.dataset.label}: ${Number(c.raw).toFixed(2)}% (${isYes ? cnt.yes : cnt.no}/${t})`;
+            }
+          }
+        }
+      }
+    }
+  });
+
+  // ตารางสรุป
+  head.innerHTML = `<tr class="bg-slate-50 text-slate-500 text-xs">
+    <th class="px-3 py-2.5 text-left font-bold sticky left-0 bg-slate-50 z-10">หน่วยงาน</th>
+    ${itemNums.map(i => `<th class="px-2 py-2.5 text-center font-semibold" title="${bc_esc(bc_checkListData[i])}">ข้อ ${i}</th>`).join('')}
+    <th class="px-3 py-2.5 text-center font-bold bg-blue-50 text-blue-700">รวม</th>
+  </tr>`;
+
+  const cellCls = (p) => isYes
+    ? (p >= 80 ? 'bg-blue-50 text-blue-700' : (p >= 60 ? 'bg-sky-50 text-sky-700' : 'bg-yellow-50 text-yellow-700'))
+    : (p === 0 ? 'text-slate-400' : (p >= 40 ? 'bg-yellow-200 text-yellow-900' : 'bg-yellow-50 text-yellow-700'));
+
+  const cell = (c) => {
+    const t = c.yes + c.no;
+    if (!t) return `<td class="px-2 py-2 text-center text-slate-300">-</td>`;
+    const p = pct(c);
+    return `<td class="px-2 py-2 text-center ${cellCls(p)}"><span class="block text-xs font-bold">${p.toFixed(1)}%</span><span class="block text-[10px] opacity-70">${isYes ? c.yes : c.no}/${t}</span></td>`;
+  };
+
+  body.innerHTML = rows.map((d, k) => `
+    <tr class="hover:bg-slate-50/60">
+      <td class="px-3 py-2 font-bold text-slate-700 sticky left-0 bg-white z-10 whitespace-nowrap">
+        <span class="inline-block w-2.5 h-2.5 rounded-full mr-1.5" style="background:${bc_DEPT_PALETTE[k % bc_DEPT_PALETTE.length]}"></span>${bc_esc(d.name)}
+        <span class="block text-[10px] font-normal text-slate-400 pl-4">${d.n} ครั้ง</span>
+      </td>
+      ${itemNums.map(i => cell(d.items[i])).join('')}
+      ${cell({ yes: d.yes, no: d.no }).replace('px-2 py-2', 'px-3 py-2 font-bold bg-blue-50/40')}
+    </tr>`).join('');
 }
     function bc_renderReports() {
       const records = bc_getFilteredRecords(); const total = records.length;
