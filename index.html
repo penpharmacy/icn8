@@ -2588,7 +2588,27 @@
 let bc_deptItemChartInstance = null;
 let bc_deptItemMetric = 'yes';
 const bc_DEPT_PALETTE = ['#2563EB', '#38BDF8', '#FACC15', '#10B981', '#A855F7', '#F97316', '#EC4899', '#64748B'];
+// สีประจำหน่วยงาน (ชื่อเดียวกัน = สีเดียวกันทุกกราฟ)
+const bc_DEPT_COLORS = {
+  'OPD': '#2563EB', 'W4': '#10B981', 'W5': '#F97316',
+  'LR': '#A855F7', 'ER': '#EF4444', 'อื่นๆ': '#64748B', 'ไม่ระบุ': '#94A3B8'
+};
+const bc_DEPT_FALLBACK = ['#0EA5E9', '#EC4899', '#84CC16', '#F59E0B', '#14B8A6', '#8B5CF6'];
 
+function bc_deptColor(name) {
+  if (bc_DEPT_COLORS[name]) return bc_DEPT_COLORS[name];
+  let h = 0;
+  for (const ch of String(name)) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return bc_DEPT_FALLBACK[h % bc_DEPT_FALLBACK.length];
+}
+
+// ทำสีให้อ่อนลง (ผสมกับสีขาว) amount 0-1
+function bc_lighten(hex, amount = 0.6) {
+  const n = parseInt(hex.slice(1), 16);
+  const mix = c => Math.round(c + (255 - c) * amount);
+  const r = mix((n >> 16) & 255), g = mix((n >> 8) & 255), b = mix(n & 255);
+  return `rgb(${r}, ${g}, ${b})`;
+}
 function bc_esc(s) {
   return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
