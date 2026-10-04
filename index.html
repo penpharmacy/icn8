@@ -1378,8 +1378,7 @@
     }
 
     function saveData() {
-        const dDate = document.getElementById('obsDate').value;
-        const dTime = document.getElementById('obsTime').value;
+        setNowDateTime();
         const dRadio = document.querySelector('input[name="deptRadio"]:checked');
         const rRadio = document.querySelector('input[name="roleRadio"]:checked');
         if (!dDate || !dTime || !dRadio || !rRadio) return alert("กรุณากรอกข้อมูลให้ครบ");
