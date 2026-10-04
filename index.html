@@ -1112,7 +1112,8 @@
         document.getElementById('nav-bc').innerHTML = '<span class="w-2 h-2 rounded-full bg-slate-500"></span><span>Blood Culture</span>';
         document.getElementById('nav-mdr').innerHTML = '<span class="w-2 h-2 rounded-full bg-slate-500"></span><span>MDR Checklist</span>';
         document.getElementById('nav-cauti').innerHTML = '<span class="w-2 h-2 rounded-full bg-pink-300"></span><span>CAUTI Care Bundle</span>';
-         // ===== แทป 4-5: ล้างมือ =====
+         }
+        // ===== แทป 4-5: ล้างมือ =====
       const hhIds = ['hhform', 'hhreport'];
       const hhLabels = { bc:'Blood Culture', mdr:'MDR Checklist', cauti:'CAUTI Care Bundle', hhform:'ล้างมือ: บันทึก', hhreport:'ล้างมือ: รายงาน' };
       const baseCls = "px-4 py-1.5 rounded-full font-semibold text-xs sm:text-sm transition-all flex items-center space-x-1.5 shrink-0 ";
@@ -1136,7 +1137,7 @@
           el.className = baseCls + "bg-slate-700 text-slate-300 hover:bg-slate-600";
           el.innerHTML = `<span class="w-2 h-2 rounded-full bg-slate-500"></span><span>${hhLabels[id]}</span>`;
         });
-      }
+      
       }
     }
 
