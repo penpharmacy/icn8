@@ -2768,6 +2768,7 @@ function bc_renderDeptItemChart(records) {
         document.getElementById('bc_itemBreakdownContainer').innerHTML = `<div class="text-center py-6 text-slate-400 text-sm w-full lg:col-span-2">ไม่พบข้อมูลสถิติตามเงื่อนไขที่เลือก</div>`;
         document.getElementById('bc_chart1EmptyState').classList.remove('hidden'); if(bc_comparisonChartInstance) bc_comparisonChartInstance.destroy();
         document.getElementById('bc_chart2EmptyState').classList.remove('hidden'); const listContainer = document.getElementById('bc_nonComplianceListContainer'); if(listContainer) listContainer.innerHTML = '';
+         bc_renderDeptChart([]); bc_renderDeptItemChart([]);
         return;
       }
       document.getElementById('bc_chart1EmptyState').classList.add('hidden');
