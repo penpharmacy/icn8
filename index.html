@@ -2654,10 +2654,24 @@ function bc_renderDeptChart(records) {
     plugins: [ChartDataLabels],
     data: {
       labels: rows.map(r => r.name),
-      datasets: [
-        { label: 'ปฏิบัติ (%)', data: rows.map(r => Number(r.pYes.toFixed(2))), counts: rows.map(r => r.yes), backgroundColor: '#2563EB', borderRadius: 4 },
-        { label: 'ไม่ปฏิบัติ (%)', data: rows.map(r => Number(r.pNo.toFixed(2))), counts: rows.map(r => r.no), backgroundColor: '#FACC15', borderRadius: 4 }
-      ]
+     datasets: [
+  {
+    label: 'ปฏิบัติ (%)',
+    data: rows.map(r => Number(r.pYes.toFixed(2))),
+    counts: rows.map(r => r.yes),
+    backgroundColor: rows.map(r => bc_deptColor(r.name)),
+    borderRadius: 4
+  },
+  {
+    label: 'ไม่ปฏิบัติ (%)',
+    data: rows.map(r => Number(r.pNo.toFixed(2))),
+    counts: rows.map(r => r.no),
+    backgroundColor: rows.map(r => bc_lighten(bc_deptColor(r.name), 0.6)),
+    borderColor: rows.map(r => bc_deptColor(r.name)),
+    borderWidth: 1.5,
+    borderRadius: 4
+  }
+]
     },
     options: {
       responsive: true, maintainAspectRatio: false,
