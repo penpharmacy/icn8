@@ -1745,15 +1745,86 @@
     let charts = {};
     let currentFilteredData = [];
 
-    window.onload = fetchDataFromSheet;
-    function fetchDataFromSheet() { fetch(SCRIPT_URL).then(res => res.json()).then(data => { database = data; updateReports(); }); }
-    
+       const AUTO_REFRESH_MS = 30000;   // ดึงข้อมูลใหม่ทุก 30 วินาที (ปรับได้)
+    let lastDataHash = '';
+    let isFetching = false;
+    let yearTimer = null;
+    let fetchState = 'loading';      // loading | ok | error
+    let lastUpdated = null;
+    let filterEmpty = false;
+
+    window.onload = function () {
+        // ตั้งค่าเริ่มต้นให้ตัวกรอง เพื่อให้สลับโหมดแล้วเห็นผลทันที
+        const now = new Date();
+        document.getElementById('filterMonth').value = now.toISOString().slice(0, 7);
+        document.getElementById('filterYear').value = now.getFullYear();
+
+        fetchDataFromSheet(true);
+        setInterval(() => fetchDataFromSheet(false), AUTO_REFRESH_MS);
+        document.addEventListener('visibilitychange', () => { if (!document.hidden) fetchDataFromSheet(false); });
+        window.addEventListener('focus', () => fetchDataFromSheet(false));
+    };
+
+    async function fetchDataFromSheet(isFirst) {
+        if (isFetching) return;
+        isFetching = true;
+        if (isFirst) { fetchState = 'loading'; renderStatus(); }
+        try {
+            const res = await fetch(SCRIPT_URL + '?_=' + Date.now());
+            const data = await res.json();
+            if (!Array.isArray(data)) throw new Error('invalid data');
+            const hash = JSON.stringify(data);
+            if (hash !== lastDataHash || isFirst) {      // อัปเดตหน้าจอเมื่อข้อมูลเปลี่ยนจริงเท่านั้น
+                lastDataHash = hash;
+                database = data;
+                updateReports();
+            }
+            fetchState = 'ok';
+            lastUpdated = new Date();
+        } catch (err) {
+            console.error('Auto fetch error:', err);
+            fetchState = 'error';                        // คงข้อมูลเดิมไว้ ไม่ล้างหน้าจอ
+        } finally {
+            isFetching = false;
+            renderStatus();
+        }
+    }
+
+    function renderStatus() {
+        const dot = document.getElementById('autoDot');
+        const txt = document.getElementById('autoStatusText');
+        if (!dot || !txt) return;
+        const t = lastUpdated ? lastUpdated.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '';
+        if (fetchState === 'loading') {
+            dot.style.background = '#ffc107'; txt.textContent = 'กำลังโหลดข้อมูล...';
+        } else if (fetchState === 'error') {
+            dot.style.background = '#dc3545'; txt.textContent = 'เชื่อมต่อไม่ได้ (ลองใหม่อัตโนมัติ)';
+        } else if (filterEmpty) {
+            dot.style.background = '#fd7e14'; txt.textContent = 'ไม่พบข้อมูลในช่วงเวลาที่เลือก · ' + t;
+        } else {
+            dot.style.background = '#198754'; txt.textContent = 'อัปเดตอัตโนมัติ · ล่าสุด ' + t;
+        }
+    }
+
     function toggleFilterInputs() {
         const type = document.getElementById('filterType').value;
         document.getElementById('monthFilterGroup').style.display = (type === 'month') ? 'block' : 'none';
         document.getElementById('yearFilterGroup').style.display = (type === 'year') ? 'block' : 'none';
         document.getElementById('rangeFilterGroupStart').style.display = (type === 'range') ? 'block' : 'none';
         document.getElementById('rangeFilterGroupEnd').style.display = (type === 'range') ? 'block' : 'none';
+    }
+
+    function onFilterTypeChange() {
+        toggleFilterInputs();
+        updateReports();
+    }
+
+    function debouncedYearUpdate() {
+        clearTimeout(yearTimer);
+        yearTimer = setTimeout(() => {
+            const v = document.getElementById('filterYear').value;
+            if (v === '' || v.length === 4) updateReports();   // รอให้พิมพ์ครบ 4 หลักก่อน
+        }, 400);
     }
 
     function updateReports() {
@@ -1768,15 +1839,24 @@
         } else if (type === 'range') {
             const start = document.getElementById('filterStart').value;
             const end = document.getElementById('filterEnd').value;
-            if (start && end) filtered = database.filter(d => { const dD = d.obsDate.substring(0, 10); return dD >= start && dD <= end; });
+            if (start && end) filtered = database.filter(d => { const dD = (d.obsDate || '').substring(0, 10); return dD >= start && dD <= end; });
         }
-        if (filtered.length === 0) { alert("ไม่พบข้อมูล"); resetDashboard(); return; }
+        if (filtered.length === 0) {
+            filterEmpty = true;
+            currentFilteredData = [];
+            resetDashboard();
+            renderStatus();
+            return;                                     // ไม่มี alert เด้งรบกวนแล้ว
+        }
+        filterEmpty = false;
         currentFilteredData = filtered;
         render(filtered);
+        renderStatus();
     }
 
     function resetDashboard() {
         ['hw_val', 'hr_val', 'comp_val', 'equip_val'].forEach(id => document.getElementById(id).innerText = '0%');
+        ['hw_frac', 'hr_frac', 'comp_frac', 'equip_frac'].forEach(id => document.getElementById(id).innerText = '(0/0)');
         ['matrixTableBody', 'matrixRoleTableBody', 'momentTableBody', 'deptTableBody', 'roleTableBody', 'equipDeptTableBody'].forEach(id => document.getElementById(id).innerHTML = '');
         for (let key in charts) { if (charts[key]) { charts[key].destroy(); charts[key] = null; } }
     }
