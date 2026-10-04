@@ -2372,10 +2372,26 @@
       .catch((err) => bc_showModal("ล้มเหลว", "เกิดข้อผิดพลาด: " + err, "error"));
     }
 
+    // แสดง/ซ่อนช่องกรอก "อื่นๆ" ของหน่วยงาน
+    function bc_onDeptChange() {
+      const sel = document.querySelector('input[name="bc_deptRadio"]:checked');
+      const other = document.getElementById('bc_departmentOther');
+      if (sel && sel.value === 'อื่นๆ') { other.classList.remove('hidden'); other.focus(); }
+      else { other.classList.add('hidden'); other.value = ''; }
+    }
+
+    // อ่านค่าหน่วยงานที่เลือก (ถ้าเลือกอื่นๆ ใช้ข้อความที่พิมพ์)
+    function bc_getDepartment() {
+      const sel = document.querySelector('input[name="bc_deptRadio"]:checked');
+      if (!sel) return '';
+      if (sel.value === 'อื่นๆ') return document.getElementById('bc_departmentOther').value.trim() || 'อื่นๆ';
+      return sel.value;
+    }
+
     function bc_submitAssessment() {
       const dateVal = document.getElementById('bc_evalDate').value; const remarksVal = document.getElementById('bc_evalRemarks').value.trim();
       if (!dateVal) return bc_showModal("ข้อมูลไม่ครบ", "กรุณาระบุวันที่ประเมิน", "error");
-      const newRecord = { id: 'BLOODCULTURE_' + Date.now() + '_' + Math.floor(Math.random()*1000), date: dateVal, department: document.getElementById('bc_department').value.trim(), patientName: document.getElementById('bc_patientName').value.trim(), practitioner: document.getElementById('bc_practitioner').value.trim(), evaluator: document.getElementById('bc_evaluator').value.trim(), evalTime: document.getElementById('bc_evalTime').value, items: { ...bc_currentRecord.items }, complianceRate: Number(bc_currentRecord.complianceRate || 0).toFixed(2), remarks: remarksVal, timestamp: new Date().toISOString(), synced: false };
+      const newRecord = { id: 'BLOODCULTURE_' + Date.now() + '_' + Math.floor(Math.random()*1000), date: dateVal, department: bc_getDepartment(), patientName: document.getElementById('bc_patientName').value.trim(), practitioner: document.getElementById('bc_practitioner').value.trim(), evaluator: document.getElementById('bc_evaluator').value.trim(), evalTime: document.getElementById('bc_evalTime').value, items: { ...bc_currentRecord.items }, complianceRate: Number(bc_currentRecord.complianceRate || 0).toFixed(2), remarks: remarksVal, timestamp: new Date().toISOString(), synced: false };
       bc_db.records.unshift(newRecord); localStorage.setItem('bloodculture_records', JSON.stringify(bc_db.records));
       bc_updateUnsyncedBadge();
       if (bc_db.apiUrl) bc_syncSingleRecord(newRecord.id, true);
